@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏威夷實業社 清潔派工單</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: "Arial", "微軟正黑體", sans-serif;
+    background: #f0f0f0;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+
+  .controls {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .btn-new { background: #1a2744; color: white; }
+  .btn-print { background: #C9A84C; color: #1a2744; }
+  .btn-save { background: #27AE60; color: white; }
+
+  .form-wrap {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto 30px;
+    background: white;
+    border: 2px solid #1a2744;
+    border-radius: 4px;
+    padding: 0;
+    page-break-after: always;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* 標題 */
+  .header {
+    background: #1a2744;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+  }
+
+  .header-left .company { font-size: 16px; font-weight: 700; }
+  .header-left .license { font-size: 11px; color: #C9A84C; margin-top: 2px; }
+  .header-center { font-size: 20px; font-weight: 700; letter-spacing: 4px; }
+  .header-right { text-align: right; }
+  .header-right .order-no { font-size: 13px; color: #C9A84C; font-weight: 700; }
+  .header-right .order-label { font-size: 10px; color: #aaa; }
+
+  /* 表格 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  td {
+    border: 1px solid #aaa;
+    padding: 0;
+  }
+
+  .label {
+    background: #F0F4F8;
+    font-weight: 700;
+    font-size: 13px;
+    color: #1a2744;
+    padding: 6px 10px;
+    white-space: nowrap;
+    text-align: center;
+    width: 80px;
+  }
+
+  .value { padding: 4px 8px; }
+
+  input[type="text"], input[type="date"], input[type="time"], textarea, select {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 3px 4px;
+    background: transparent;
+    color: #333;
+    min-width: 0;
+  }
+
+  textarea { resize: none; display: block; width: 100%; }
+
+  .type-row td { padding: 6px 10px; font-size: 12px; }
+  .type-row label { margin-right: 10px; cursor: pointer; white-space: nowrap; }
+  .type-row input[type="checkbox"] { margin-right: 3px; }
+  .type-row .type-wrap { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+
+  .time-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+  .time-wrap input { flex: 1; min-width: 0; }
+
+  /* 簽名區 */
+  .sign-section { display: grid; grid-template-columns: 1fr 1fr; }
+
+  .sign-box {
+    border-top: 1px solid #aaa;
+    padding: 8px 12px;
+    min-height: 80px;
+  }
+  .sign-box:first-child { border-right: 1px solid #aaa; }
+
+  .sign-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a2744;
+    background: #F0F4F8;
+    text-align: center;
+    padding: 4px;
+    margin: -8px -12px 8px;
+    border-bottom: 1px solid #aaa;
+  }
+
+  .sign-line {
+    margin-top: 8px;
+    border-bottom: 1px solid #bbb;
+    font-size: 12px;
+    color: #777;
+    padding-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sign-line input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 12px;
+    background: transparent;
+  }
+
+  /* 存檔按鈕（在表單內） */
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 12px;
+    gap: 8px;
+    border-top: 1px solid #eee;
+    background: #fafafa;
+  }
+  .form-btn {
+    padding: 5px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .form-btn-save { background: #27AE60; color: white; }
+  .form-btn-print { background: #C9A84C; color: #1a2744; }
+  .form-btn-del { background: #eee; color: #888; }
+
+  /* 頁尾 */
+  .footer {
+    text-align: center;
+    font-size: 10px;
+    color: #999;
+    padding: 6px;
+    border-top: 1px solid #ddd;
+  }
+
+  /* 存檔成功提示 */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #27AE60;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    display: none;
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  /* 列印樣式 */
+  @media print {
+    body { background: white; padding: 0; }
+    .controls { display: none; }
+    .form-actions { display: none; }
+    .form-wrap {
+      margin: 0;
+      border: 2px solid #1a2744;
+      max-width: 100%;
+      box-shadow: none;
+    }
+    @page { size: A5 landscape; margin: 8mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="btn btn-new" onclick="newOrder()">＋ 新增派工單</button>
+  <button class="btn btn-print" onclick="window.print()">🖨️ 列印全部</button>
+</div>
+
+<div id="forms-container"></div>
+<div class="toast" id="toast">✅ 派工單已儲存到電腦！</div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuJ9v5KvA_NI8iFfkgXmZ8sGooJtSMEF9F2F2QlPdxxgkW8xZxhM-lN3g37Jb4NiJV9g/exec';
+
+// 目前單號（從試算表讀取後更新）
+let currentNo = 514;
+let isLoading = true;
+
+function getToday() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || '#27AE60';
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+
+// 從試算表讀取最新單號
+async function fetchCurrentNo() {
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=getDispatchNo');
+    const data = await res.json();
+    if (data.success) {
+      currentNo = Number(data.no);
+    }
+  } catch(e) {
+    console.log('讀取單號失敗，使用預設值');
+  }
+  isLoading = false;
+  // 更新畫面上第一張派工單的單號
+  const firstNo = document.querySelector('.order-no');
+  if (firstNo) firstNo.textContent = String(currentNo).padStart(6, '0');
+}
+
+// 儲存派工記錄到試算表
+async function saveDispatch(wrapper, orderNo) {
+  const client = wrapper.querySelector('input[placeholder="請輸入客戶名稱"]').value || '';
+  const contact = wrapper.querySelector('input[placeholder="姓名"]').value || '';
+  const phone = wrapper.querySelector('input[placeholder="電話號碼"]').value || '';
+  const address = wrapper.querySelector('input[placeholder="請輸入完整地址"]').value || '';
+  const staff = wrapper.querySelector('input[placeholder="派工人員姓名（可多人）"]').value || '';
+  const scope = wrapper.querySelector('input[placeholder*="室內1F"]').value || '';
+  const notes = wrapper.querySelector('textarea').value || '';
+
+  // 服務類型
+  const checkboxes = wrapper.querySelectorAll('.type-wrap input[type="checkbox"]');
+  const labels = wrapper.querySelectorAll('.type-wrap label');
+  let types = [];
+  checkboxes.forEach((cb, i) => {
+    if (cb.checked) {
+      const t = labels[i].textContent.trim().replace('其他：','').trim();
+      if (t) types.push(t);
+    }
+  });
+  const otherInput = wrapper.querySelector('.type-wrap input[type="text"]');
+  if (otherInput && otherInput.value) types.push('其他：' + otherInput.value);
+
+  // 時間
+  const timeInputs = wrapper.querySelectorAll('input[type="date"], input[type="time"]');
+  const startTime = (timeInputs[0].value || '') + ' ' + (timeInputs[1].value || '');
+  const endTime = (timeInputs[2].value || '') + ' ' + (timeInputs[3].value || '');
+
+  const payload = {
+    action: 'saveDispatch',
+    orderNo: orderNo,
+    client, contact, phone, address, staff,
+    types: types.join('、'),
+    scope,
+    startTime: startTime.trim(),
+    endTime: endTime.trim(),
+    notes,
+    timestamp: new Date().toLocaleString('zh-TW')
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+function saveAsPDF(wrapper, orderNo) {
+  // 把所有 input/textarea 的值轉成 value 屬性，確保列印時顯示
+  const clone = wrapper.cloneNode(true);
+
+  // 處理所有 input[type=text], input[type=date], input[type=time]
+  const origInputs = wrapper.querySelectorAll('input[type="text"], input[type="date"], input[type="time"]');
+  const cloneInputs = clone.querySelectorAll('input[type="text"], input[type="date"], input[type="time"]');
+  origInputs.forEach((inp, i) => {
+    cloneInputs[i].setAttribute('value', inp.value);
+  });
+
+  // 處理所有 textarea
+  const origTextareas = wrapper.querySelectorAll('textarea');
+  const cloneTextareas = clone.querySelectorAll('textarea');
+  origTextareas.forEach((ta, i) => {
+    cloneTextareas[i].textContent = ta.value;
+  });
+
+  // 處理 checkbox
+  const origChecks = wrapper.querySelectorAll('input[type="checkbox"]');
+  const cloneChecks = clone.querySelectorAll('input[type="checkbox"]');
+  origChecks.forEach((cb, i) => {
+    if (cb.checked) cloneChecks[i].setAttribute('checked', 'checked');
+    else cloneChecks[i].removeAttribute('checked');
+  });
+
+  // 隱藏操作按鈕
+  const cloneActions = clone.querySelector('.form-actions');
+  if (cloneActions) cloneActions.remove();
+
+  const printContent = clone.outerHTML;
+
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <!DOCTYPE html>
+    <html lang="zh-TW">
+    <head>
+    <meta charset="UTF-8">
+    <title>清潔派工單_${orderNo}</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: "Arial","微軟正黑體",sans-serif; background: white; }
+      .form-wrap { width: 100%; border: 2px solid #1a2744; overflow: hidden; }
+      .header { background: #1a2744; color: white; display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
+      .header-left .company { font-size: 16px; font-weight: 700; }
+      .header-left .license { font-size: 11px; color: #C9A84C; }
+      .header-center { font-size: 20px; font-weight: 700; letter-spacing: 4px; }
+      .header-right { text-align: right; }
+      .header-right .order-no { font-size: 13px; color: #C9A84C; font-weight: 700; }
+      .header-right .order-label { font-size: 10px; color: #aaa; }
+      table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      td { border: 1px solid #aaa; padding: 0; }
+      .label { background: #F0F4F8; font-weight: 700; font-size: 13px; color: #1a2744; padding: 6px 10px; text-align: center; width: 80px; white-space: nowrap; }
+      .value { padding: 4px 8px; font-size: 13px; }
+      input[type="text"], input[type="date"], input[type="time"] {
+        width: 100%; border: none; font-family: inherit; font-size: 13px;
+        padding: 3px 4px; background: transparent; color: #333; min-width: 0;
+      }
+      textarea { width: 100%; border: none; font-family: inherit; font-size: 13px; padding: 3px 4px; background: transparent; color: #333; resize: none; }
+      .type-row td { padding: 6px 10px; font-size: 12px; }
+      .type-row label { margin-right: 10px; }
+      .type-wrap { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+      .time-wrap { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 13px; }
+      .time-wrap input { flex: 1; min-width: 0; }
+      .sign-section { display: grid; grid-template-columns: 1fr 1fr; }
+      .sign-box { border-top: 1px solid #aaa; padding: 8px 12px; min-height: 80px; }
+      .sign-box:first-child { border-right: 1px solid #aaa; }
+      .sign-title { font-size: 12px; font-weight: 700; color: #1a2744; background: #F0F4F8; text-align: center; padding: 4px; margin: -8px -12px 8px; border-bottom: 1px solid #aaa; }
+      .sign-line { margin-top: 8px; border-bottom: 1px solid #bbb; font-size: 12px; color: #777; padding-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+      .sign-line input { flex: 1; border: none; font-size: 12px; }
+      .footer { text-align: center; font-size: 10px; color: #999; padding: 6px; border-top: 1px solid #ddd; }
+      .form-actions { display: none !important; }
+      @page { size: A5 landscape; margin: 8mm; }
+    </style>
+    </head>
+    <body>
+    ${printContent}
+    <script>
+      window.onload = function() {
+        window.print();
+        setTimeout(() => window.close(), 2000);
+      };
+    <\/script>
+    </body>
+    </html>
+  `);
+  win.document.close();
+
+  // 自動設定建議檔名
+  const clientName = wrapper.querySelector('input[placeholder="請輸入客戶名稱"]').value || '未填客戶';
+  const dateInput = wrapper.querySelector('input[type="date"]').value || new Date().toISOString().split('T')[0];
+  const dateStr = dateInput.replace(/-/g, '');
+  const suggestName = `清潔派工單_${clientName}_${dateStr}`;
+
+  // 儲存到試算表並更新單號
+  saveDispatch(wrapper, orderNo).then(ok => {
+    if (ok) {
+      currentNo++;
+      // 更新這張派工單的單號顯示為下一筆
+      showToast(`✅ 已存檔！建議檔名：${suggestName}｜下一筆單號：${String(currentNo).padStart(6,'0')}`);
+    } else {
+      showToast('⚠️ PDF已開啟，但試算表儲存失敗，請檢查網路', '#E67E22');
+    }
+  });
+}
+
+function deleteForm(wrapper) {
+  if (confirm('確定要刪除這張派工單？')) {
+    wrapper.remove();
+  }
+}
+
+function createForm() {
+  const orderNo = String(currentNo).padStart(6, '0');
+  const today = getToday();
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'form-wrap';
+  wrapper.innerHTML = `
+    <div class="header">
+      <div class="header-left">
+        <div class="company">夏威夷實業社</div>
+        <div class="license">環藥病媒字第 13-042 號</div>
+      </div>
+      <div class="header-center">清潔派工單</div>
+      <div class="header-right">
+        <div class="order-label">派工單號</div>
+        <div class="order-no">${orderNo}</div>
+      </div>
+    </div>
+
+    <table>
+      <tr>
+        <td class="label">客戶名稱</td>
+        <td class="value" colspan="3"><input type="text" placeholder="請輸入客戶名稱"></td>
+        <td class="label">聯　絡　人</td>
+        <td class="value"><input type="text" placeholder="姓名"></td>
+      </tr>
+      <tr>
+        <td class="label">聯絡電話</td>
+        <td class="value"><input type="text" placeholder="電話號碼"></td>
+        <td class="label">施作地址</td>
+        <td class="value" colspan="3"><input type="text" placeholder="請輸入完整地址"></td>
+      </tr>
+      <tr>
+        <td class="label">服務人員</td>
+        <td class="value" colspan="5"><input type="text" placeholder="派工人員姓名（可多人）"></td>
+      </tr>
+      <tr class="type-row">
+        <td class="label">服務類型</td>
+        <td colspan="5">
+          <div class="type-wrap">
+            <label><input type="checkbox"> 室內細清</label>
+            <label><input type="checkbox"> 粗清</label>
+            <label><input type="checkbox"> 地板清潔</label>
+            <label><input type="checkbox"> 外牆清洗</label>
+            <label><input type="checkbox"> 水塔清洗</label>
+            <label><input type="checkbox"> 其他：<input type="text" style="width:80px;border-bottom:1px solid #aaa;border-top:none;border-left:none;border-right:none;"></label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="label">施作範圍</td>
+        <td class="value" colspan="5"><input type="text" placeholder="例：室內1F-4F、陽台、車庫（不含鐵捲門）"></td>
+      </tr>
+      <tr>
+        <td class="label" style="white-space:nowrap;">開始時間</td>
+        <td colspan="2">
+          <div class="time-wrap">
+            <input type="date" value="${today}">
+            <input type="time" value="09:00">
+          </div>
+        </td>
+        <td class="label" style="white-space:nowrap;">結束時間</td>
+        <td colspan="2">
+          <div class="time-wrap">
+            <input type="date" value="${today}">
+            <input type="time" value="17:00">
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="label">備　　　註</td>
+        <td class="value" colspan="5"><textarea rows="3" placeholder="注意事項、特殊需求、客戶要求等..."></textarea></td>
+      </tr>
+    </table>
+
+    <div class="sign-section">
+      <div class="sign-box">
+        <div class="sign-title">現場人員簽名</div>
+        <div class="sign-line"><span>姓名：</span><input type="text"></div>
+        <div class="sign-line"><span>日期：</span><input type="text"></div>
+      </div>
+      <div class="sign-box">
+        <div class="sign-title">客戶簽名 / 蓋章</div>
+        <div class="sign-line"><span>簽名：</span><input type="text"></div>
+        <div class="sign-line"><span>日期：</span><input type="text"></div>
+      </div>
+    </div>
+
+    <div class="footer">夏威夷實業社｜屏東市瑞華街129號｜0908-959-655｜hawaii365days@gmail.com</div>
+
+    <div class="form-actions">
+      <button class="form-btn form-btn-del" onclick="deleteForm(this.closest('.form-wrap'))">🗑️ 刪除</button>
+      <button class="form-btn form-btn-wa" onclick="copyWAMessage(this.closest('.form-wrap'), '${orderNo}')">📋 複製派工通知</button>
+      <button class="form-btn form-btn-print" onclick="saveAsPDF(this.closest('.form-wrap'), '${orderNo}')">💾 存檔為PDF</button>
+    </div>
+  `;
+
+  return wrapper;
+}
+
+function newOrder() {
+  const container = document.getElementById('forms-container');
+  container.appendChild(createForm());
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function copyWAMessage(wrapper, orderNo) {
+  const clientName = wrapper.querySelector('input[placeholder="請輸入客戶名稱"]').value || '（未填）';
+  const contact = wrapper.querySelector('input[placeholder="姓名"]').value || '（未填）';
+  const phone = wrapper.querySelector('input[placeholder="電話號碼"]').value || '（未填）';
+  const address = wrapper.querySelector('input[placeholder="請輸入完整地址"]').value || '（未填）';
+  const staff = wrapper.querySelector('input[placeholder="派工人員姓名（可多人）"]').value || '（未填）';
+  const scope = wrapper.querySelector('input[placeholder*="室內1F"]').value || '（未填）';
+  const notes = wrapper.querySelector('textarea').value || '無';
+
+  const checkboxes = wrapper.querySelectorAll('.type-wrap input[type="checkbox"]');
+  const labels = wrapper.querySelectorAll('.type-wrap label');
+  let types = [];
+  checkboxes.forEach((cb, i) => {
+    if (cb.checked) {
+      const t = labels[i].textContent.trim().replace('其他：','').trim();
+      if (t) types.push(t);
+    }
+  });
+  const otherInput = wrapper.querySelector('.type-wrap input[type="text"]');
+  if (otherInput && otherInput.value) types.push('其他：' + otherInput.value);
+  const typeStr = types.length > 0 ? types.join('、') : '（未選）';
+
+  const timeInputs = wrapper.querySelectorAll('input[type="date"], input[type="time"]');
+  const startDate = timeInputs[0].value || '';
+  const startTime = timeInputs[1].value || '';
+  const endDate = timeInputs[2].value || '';
+  const endTime = timeInputs[3].value || '';
+
+  const msg =
+`🔧 【夏威夷實業社 派工通知】
+━━━━━━━━━━━━━━
+📋 派工單號：${orderNo}
+👤 客戶：${clientName}
+🙋 聯絡人：${contact}｜📞 ${phone}
+📍 地址：${address}
+━━━━━━━━━━━━━━
+🧹 服務類型：${typeStr}
+📐 施作範圍：${scope}
+⏰ 開始：${startDate} ${startTime}
+🏁 結束：${endDate} ${endTime}
+👷 派工人員：${staff}
+━━━━━━━━━━━━━━
+📝 備註：${notes}
+
+請準時到場，如有問題請聯繫達人哥。`;
+
+  navigator.clipboard.writeText(msg).then(() => {
+    showToast('✅ 派工通知已複製！請開啟 WhatsApp 群組貼上發送');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = msg;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('✅ 派工通知已複製！請開啟 WhatsApp 群組貼上發送');
+  });
+}
+
+window.onload = function() {
+  fetchCurrentNo();
+  document.getElementById('forms-container').appendChild(createForm());
+};
+</script>
+</body>
+</html>
