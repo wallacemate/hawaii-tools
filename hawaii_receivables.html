@@ -534,7 +534,9 @@ async function saveToSheet() {
     };
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload),
+      mode: 'no-cors'
     });
     showToast('✅ 已儲存到試算表！');
   } catch(e) {
