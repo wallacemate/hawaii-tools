@@ -594,8 +594,8 @@ function copyWAMessage(wrapper, orderNo) {
   });
 }
 
-window.onload = function() {
-  fetchCurrentNo();
+window.onload = async function() {
+  await fetchCurrentNo();
   document.getElementById('forms-container').appendChild(createForm());
 };
 </script>
