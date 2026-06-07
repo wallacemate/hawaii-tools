@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏威夷實業社｜工具箱</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-light: #243460;
+  --gold: #C9A84C;
+  --gold-light: #e8c96a;
+  --cream: #f8f4ee;
+  --text: #2c2c2c;
+  --text-light: #666;
+  --border: rgba(201,168,76,0.2);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--navy);
+  min-height: 100vh;
+  color: var(--cream);
+  overflow-x: hidden;
+}
+
+/* 背景紋理 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* 頂部標題區 */
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-badge {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.header h1 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+.header-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+}
+
+/* 時鐘 */
+.clock-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 48px;
+  padding: 16px 24px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.clock-time {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 3px;
+}
+
+.clock-date {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+}
+
+.clock-divider {
+  width: 1px;
+  height: 30px;
+  background: var(--border);
+}
+
+/* 分類標題 */
+.section-title {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.section { margin-bottom: 40px; }
+
+/* 工具卡片網格 */
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* 工具卡片 */
+.tool-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(201,168,76,0.08), transparent);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.tool-card:hover {
+  border-color: rgba(201,168,76,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.tool-card:hover::before { opacity: 1; }
+
+.tool-card.large {
+  padding: 20px 24px;
+  grid-column: span 2;
+}
+
+.tool-icon {
+  font-size: 24px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201,168,76,0.1);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.tool-card.large .tool-icon {
+  font-size: 28px;
+  width: 52px;
+  height: 52px;
+}
+
+.tool-info { flex: 1; min-width: 0; }
+
+.tool-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tool-card.large .tool-name { font-size: 16px; }
+
+.tool-desc {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tool-arrow {
+  font-size: 14px;
+  color: rgba(201,168,76,0.5);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.tool-card:hover .tool-arrow {
+  transform: translateX(3px);
+  color: var(--gold);
+}
+
+/* 快速備忘錄 */
+.memo-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.memo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.memo-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gold);
+}
+
+.memo-save-btn {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  color: var(--gold);
+  transition: all 0.2s;
+}
+
+.memo-save-btn:hover {
+  background: rgba(201,168,76,0.1);
+}
+
+.memo-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: rgba(255,255,255,0.7);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13px;
+  line-height: 1.8;
+  resize: none;
+  min-height: 100px;
+}
+
+.memo-textarea::placeholder {
+  color: rgba(255,255,255,0.2);
+}
+
+/* 頁尾 */
+.footer {
+  text-align: center;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1px;
+}
+
+/* 響應式 */
+@media (max-width: 600px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .tool-card.large { grid-column: span 1; }
+  .clock-bar { flex-direction: column; gap: 8px; }
+  .clock-divider { width: 40px; height: 1px; }
+  .header h1 { font-size: 24px; }
+}
+
+/* 動畫 */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+  animation: fadeUp 0.5s ease both;
+}
+
+.section:nth-child(1) { animation-delay: 0.1s; }
+.section:nth-child(2) { animation-delay: 0.2s; }
+.section:nth-child(3) { animation-delay: 0.3s; }
+.section:nth-child(4) { animation-delay: 0.4s; }
+.section:nth-child(5) { animation-delay: 0.5s; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 標題 -->
+  <div class="header">
+    <div class="header-badge">Hawaii Industrial</div>
+    <h1>夏威夷實業社</h1>
+    <div class="header-sub">業務工具箱 · 達人哥專用</div>
+  </div>
+
+  <!-- 時鐘 -->
+  <div class="clock-bar">
+    <div class="clock-time" id="clock">--:--:--</div>
+    <div class="clock-divider"></div>
+    <div class="clock-date" id="date">載入中...</div>
+  </div>
+
+  <!-- 核心業務工具 -->
+  <div class="section">
+    <div class="section-title">核心業務工具</div>
+    <div class="grid grid-2">
+      <a class="tool-card large" href="夏威夷實業社_報價單.html" target="_blank" target="_blank">
+        <div class="tool-icon">📋</div>
+        <div class="tool-info">
+          <div class="tool-name">報價單系統</div>
+          <div class="tool-desc">清潔業務＋病媒防治，含自動計算、印章、PDF存檔</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+      <a class="tool-card large" href="夏威夷實業社_清潔派工單.html" target="_blank" target="_blank">
+        <div class="tool-icon">🔧</div>
+        <div class="tool-info">
+          <div class="tool-name">清潔派工單</div>
+          <div class="tool-desc">填寫後一鍵 WhatsApp 通知員工，自動流水號</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+      <a class="tool-card" href="https://docs.google.com/spreadsheets/d/1xsnhJyLIOgnjpn5v0iBfg_W-n-pgY_tv/edit" target="_blank" target="_blank">
+        <div class="tool-icon">💰</div>
+        <div class="tool-info">
+          <div class="tool-name">應收款追蹤表</div>
+          <div class="tool-desc">14筆待收，共約43萬</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+      <a class="tool-card" href="https://calendar.google.com" target="_blank">
+        <div class="tool-icon">📅</div>
+        <div class="tool-info">
+          <div class="tool-name">工作行事曆</div>
+          <div class="tool-desc">Google 日曆，員工共享排程</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 人員管理 -->
+  <div class="section">
+    <div class="section-title">人員管理</div>
+    <div class="grid grid-3">
+      <a class="tool-card" href="https://wallacemate.github.io/hawaii-checkin" target="_blank">
+        <div class="tool-icon">👷</div>
+        <div class="tool-info">
+          <div class="tool-name">員工打卡</div>
+          <div class="tool-desc">GPS定位打卡頁面</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+      <a class="tool-card" href="https://docs.google.com/forms/d/1Sa3OJLLjknJoUIrhr1kh46ZX9tBb2VXvx4eu8m6_nII/edit" target="_blank">
+        <div class="tool-icon">📊</div>
+        <div class="tool-info">
+          <div class="tool-name">考勤表單管理</div>
+          <div class="tool-desc">Google 表單後台</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+      <a class="tool-card" href="https://t.me/hawaii_daily_bot" target="_blank">
+        <div class="tool-icon">🤖</div>
+        <div class="tool-info">
+          <div class="tool-name">每日提醒 Bot</div>
+          <div class="tool-desc">Telegram @hawaii_daily_bot</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 行銷與品牌 -->
+  <div class="section">
+    <div class="section-title">行銷與品牌</div>
+    <div class="grid grid-3">
+      <a class="tool-card" href="https://www.tiktok.com/@hawaiipco" target="_blank">
+        <div class="tool-icon">🎵</div>
+        <div class="tool-info">
+          <div class="tool-name">TikTok 帳號</div>
+          <div class="tool-desc">@hawaiipco</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+      <a class="tool-card" href="https://klingai.com" target="_blank">
+        <div class="tool-icon">🎬</div>
+        <div class="tool-info">
+          <div class="tool-name">Kling AI</div>
+          <div class="tool-desc">短影音 AI 生成</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+      <a class="tool-card" href="https://hawaii365days.com" target="_blank">
+        <div class="tool-icon">🌐</div>
+        <div class="tool-info">
+          <div class="tool-name">公司網站</div>
+          <div class="tool-desc">hawaii365days.com</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 政府採購 -->
+  <div class="section">
+    <div class="section-title">政府採購</div>
+    <div class="grid grid-2">
+      <a class="tool-card" href="https://web.pcc.gov.tw" target="_blank">
+        <div class="tool-icon">🏛</div>
+        <div class="tool-info">
+          <div class="tool-name">政府電子採購網</div>
+          <div class="tool-desc">標案搜尋、投標、決標查詢</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+      <a class="tool-card" href="https://www.taiwanbuying.com.tw" target="_blank">
+        <div class="tool-icon">📰</div>
+        <div class="tool-info">
+          <div class="tool-name">台灣採購公報網</div>
+          <div class="tool-desc">每日標案電子報訂閱</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 快速備忘錄 -->
+  <div class="section">
+    <div class="section-title">快速備忘錄</div>
+    <div class="memo-box">
+      <div class="memo-header">
+        <div class="memo-title">📝 今日重點</div>
+        <button class="memo-save-btn" onclick="saveMemo()">儲存</button>
+      </div>
+      <textarea class="memo-textarea" id="memo" placeholder="記錄今天的重要事項、客戶聯絡、待追蹤項目..."></textarea>
+    </div>
+  </div>
+
+  <div class="footer">
+    夏威夷實業社｜環藥病媒字第 13-042 號｜0908-959-655
+  </div>
+
+</div>
+
+<script>
+// 時鐘
+function updateClock() {
+  var now = new Date();
+  var h = String(now.getHours()).padStart(2,'0');
+  var m = String(now.getMinutes()).padStart(2,'0');
+  var s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+
+  var days = ['日','一','二','三','四','五','六'];
+  var y = now.getFullYear() - 1911;
+  var mo = String(now.getMonth()+1).padStart(2,'0');
+  var d = String(now.getDate()).padStart(2,'0');
+  document.getElementById('date').textContent =
+    '民國 ' + y + ' 年 ' + mo + ' 月 ' + d + ' 日（週' + days[now.getDay()] + '）';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// 備忘錄
+function saveMemo() {
+  var val = document.getElementById('memo').value;
+  localStorage.setItem('hawaii_memo', val);
+  var btn = document.querySelector('.memo-save-btn');
+  btn.textContent = '✅ 已儲存';
+  setTimeout(function() { btn.textContent = '儲存'; }, 2000);
+}
+
+// 載入備忘錄
+window.onload = function() {
+  var saved = localStorage.getItem('hawaii_memo');
+  if (saved) { document.getElementById('memo').value = saved; }
+};
+
+// 自動儲存
+document.getElementById('memo').addEventListener('input', function() {
+  localStorage.setItem('hawaii_memo', this.value);
+});
+</script>
+</body>
+</html>
