@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏威夷實業社｜應收款管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-light: #243460;
+  --gold: #C9A84C;
+  --gold-light: #e8c96a;
+  --cream: #f8f4ee;
+  --border: rgba(201,168,76,0.2);
+  --red: #e74c3c;
+  --green: #27AE60;
+  --orange: #E67E22;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--navy);
+  min-height: 100vh;
+  color: var(--cream);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+/* 標題 */
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.header-badge { font-size: 11px; letter-spacing: 3px; color: var(--gold); display: block; margin-bottom: 8px; }
+.header h1 { font-family: 'Noto Serif TC', serif; font-size: 26px; font-weight: 900; color: white; letter-spacing: 2px; }
+
+/* 統計卡片 */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  text-align: center;
+}
+.stat-label { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 1px; margin-bottom: 6px; }
+.stat-value { font-family: 'Noto Serif TC', serif; font-size: 22px; font-weight: 700; color: var(--gold); }
+.stat-value.red { color: var(--red); }
+.stat-value.green { color: var(--green); }
+
+/* 操作列 */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Noto Sans TC', sans-serif;
+  transition: all 0.2s;
+}
+.btn-add { background: var(--gold); color: var(--navy); }
+.btn-add:hover { background: var(--gold-light); }
+.btn-save { background: var(--green); color: white; }
+.btn-save:hover { background: #2ecc71; }
+
+.filter-wrap { margin-left: auto; display: flex; gap: 8px; }
+.filter-select {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: white;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  cursor: pointer;
+}
+.filter-select option { background: #1a2744; }
+
+/* 表格 */
+.table-wrap {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: rgba(201,168,76,0.1); }
+th {
+  padding: 12px 14px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--gold);
+  font-weight: 500;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+tbody tr:hover { background: rgba(255,255,255,0.04); }
+tbody tr:last-child { border-bottom: none; }
+td { padding: 10px 14px; font-size: 13px; vertical-align: middle; }
+
+/* 可編輯欄位 */
+td input[type="text"], td input[type="number"], td select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13px;
+  width: 100%;
+  padding: 2px 0;
+}
+td input[type="text"]:focus, td input[type="number"]:focus, td select:focus {
+  border-bottom: 1px solid var(--gold);
+}
+td select { cursor: pointer; }
+td select option { background: #1a2744; }
+
+/* 金額欄 */
+.amount { font-weight: 500; color: var(--gold-light); white-space: nowrap; }
+
+/* 狀態徽章 */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.badge-uncollected { background: rgba(231,76,60,0.2); color: #ff6b6b; border: 1px solid rgba(231,76,60,0.3); }
+.badge-collected { background: rgba(39,174,96,0.2); color: #2ecc71; border: 1px solid rgba(39,174,96,0.3); }
+.badge-partial { background: rgba(230,126,34,0.2); color: #f39c12; border: 1px solid rgba(230,126,34,0.3); }
+
+/* 刪除按鈕 */
+.btn-del {
+  background: rgba(231,76,60,0.15);
+  border: 1px solid rgba(231,76,60,0.3);
+  color: #ff6b6b;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-del:hover { background: rgba(231,76,60,0.3); }
+
+/* 空狀態 */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: rgba(255,255,255,0.3);
+  font-size: 14px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--green);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: none;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Modal 新增 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #1e2d50;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  width: 90%;
+  max-width: 480px;
+}
+.modal h2 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 18px;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 6px; display: block; }
+.form-input, .form-select {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: white;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--gold); }
+.form-select option { background: #1a2744; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+.btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+.btn-confirm { background: var(--gold); color: var(--navy); }
+
+/* 頁尾 */
+.footer {
+  text-align: center;
+  margin-top: 32px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+
+@media (max-width: 600px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .filter-wrap { margin-left: 0; width: 100%; }
+  th:nth-child(3), td:nth-child(3),
+  th:nth-child(5), td:nth-child(5) { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <span class="header-badge">Hawaii Industrial</span>
+    <h1>應收款管理系統</h1>
+  </div>
+
+  <!-- 統計 -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">待收筆數</div>
+      <div class="stat-value red" id="stat-count">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">待收總金額</div>
+      <div class="stat-value red" id="stat-total">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">已收金額</div>
+      <div class="stat-value green" id="stat-collected">$0</div>
+    </div>
+  </div>
+
+  <!-- 操作列 -->
+  <div class="toolbar">
+    <button class="btn btn-add" onclick="openModal()">＋ 新增應收款</button>
+    <button class="btn btn-save" onclick="saveToSheet()">💾 儲存到試算表</button>
+    <div class="filter-wrap">
+      <select class="filter-select" id="filter-status" onchange="renderTable()">
+        <option value="all">全部狀態</option>
+        <option value="未收">🔴 未收</option>
+        <option value="部分收款">🟡 部分收款</option>
+        <option value="已收">✅ 已收</option>
+      </select>
+      <select class="filter-select" id="filter-type" onchange="renderTable()">
+        <option value="all">全部類別</option>
+        <option value="清潔勞務">清潔勞務</option>
+        <option value="病媒防治">病媒防治</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 表格 -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>客戶名稱</th>
+          <th>業務類別</th>
+          <th>金額（元）</th>
+          <th>施工時間</th>
+          <th>請款狀態</th>
+          <th>追蹤備註</th>
+          <th>收款狀態</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">夏威夷實業社｜環藥病媒字第 13-042 號｜0908-959-655</div>
+</div>
+
+<!-- 新增 Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>➕ 新增應收款</h2>
+    <div class="form-group">
+      <label class="form-label">客戶名稱 *</label>
+      <input class="form-input" id="new-client" type="text" placeholder="請輸入客戶名稱">
+    </div>
+    <div class="form-group">
+      <label class="form-label">業務類別</label>
+      <select class="form-select" id="new-type">
+        <option>清潔勞務</option>
+        <option>病媒防治</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">金額（元）</label>
+      <input class="form-input" id="new-amount" type="number" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">施工時間</label>
+      <input class="form-input" id="new-workdate" type="text" placeholder="例：2026/06">
+    </div>
+    <div class="form-group">
+      <label class="form-label">請款狀態</label>
+      <select class="form-select" id="new-invoice">
+        <option>未請款</option>
+        <option>已請款</option>
+        <option>請款中</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">追蹤備註</label>
+      <input class="form-input" id="new-note" type="text" placeholder="選填">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn btn-confirm" onclick="addRecord()">新增</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuJ9v5KvA_NI8iFfkgXmZ8sGooJtSMEF9F2F2QlPdxxgkW8xZxhM-lN3g37Jb4NiJV9g/exec';
+
+// 初始資料（從Excel匯入）
+let records = [
+  {id:1, client:'中洲建設', type:'清潔勞務', amount:40000, workdate:'2023年', invoice:'未請款', note:'金額大約，需確認實際金額', status:'未收'},
+  {id:2, client:'甲山林建設', type:'清潔勞務', amount:100000, workdate:'2024年初', invoice:'未請款', note:'金額大約，需確認實際金額', status:'未收'},
+  {id:3, client:'晶城環保', type:'清潔勞務', amount:100000, workdate:'2024年', invoice:'未請款', note:'金額大約，需確認實際金額', status:'未收'},
+  {id:4, client:'木工豪哥', type:'清潔勞務', amount:8000, workdate:'2025/02', invoice:'未請款', note:'', status:'未收'},
+  {id:5, client:'新園火鍋', type:'清潔勞務', amount:20000, workdate:'2025/12', invoice:'未請款', note:'', status:'未收'},
+  {id:6, client:'周姵雯', type:'清潔勞務', amount:20000, workdate:'2026/01', invoice:'未請款', note:'', status:'未收'},
+  {id:7, client:'Eva 郭設計師', type:'清潔勞務', amount:8000, workdate:'2026/02', invoice:'未請款', note:'', status:'未收'},
+  {id:8, client:'張設計師', type:'清潔勞務', amount:50000, workdate:'2026/02', invoice:'未請款', note:'金額大約，需確認實際金額', status:'未收'},
+  {id:9, client:'五福建設', type:'清潔勞務', amount:30000, workdate:'2026/03', invoice:'未請款', note:'', status:'未收'},
+  {id:10, client:'東南建設', type:'清潔勞務', amount:5250, workdate:'2026/03', invoice:'未請款', note:'', status:'未收'},
+  {id:11, client:'晶滿樓', type:'清潔勞務', amount:20000, workdate:'2026/03-05', invoice:'未請款', note:'金額大約，需確認實際金額', status:'未收'},
+  {id:12, client:'虹美廚房', type:'清潔勞務', amount:10000, workdate:'2026/03-05', invoice:'未請款', note:'金額大約，需確認實際金額', status:'未收'},
+  {id:13, client:'屏蒔社區管委會', type:'清潔勞務', amount:10000, workdate:'2026/04', invoice:'未請款', note:'', status:'未收'},
+  {id:14, client:'東南建設主任', type:'清潔勞務', amount:13000, workdate:'2026/04', invoice:'未請款', note:'', status:'未收'},
+];
+
+let nextId = 15;
+
+function getStatusBadge(status) {
+  if (status === '已收') return `<span class="badge badge-collected">✅ 已收</span>`;
+  if (status === '部分收款') return `<span class="badge badge-partial">🟡 部分</span>`;
+  return `<span class="badge badge-uncollected">🔴 未收</span>`;
+}
+
+function getFilteredRecords() {
+  const statusFilter = document.getElementById('filter-status').value;
+  const typeFilter = document.getElementById('filter-type').value;
+  return records.filter(r => {
+    const statusMatch = statusFilter === 'all' || r.status === statusFilter;
+    const typeMatch = typeFilter === 'all' || r.type === typeFilter;
+    return statusMatch && typeMatch;
+  });
+}
+
+function updateStats() {
+  const uncollected = records.filter(r => r.status !== '已收');
+  const collected = records.filter(r => r.status === '已收');
+  const totalUncollected = uncollected.reduce((s, r) => s + Number(r.amount), 0);
+  const totalCollected = collected.reduce((s, r) => s + Number(r.amount), 0);
+  document.getElementById('stat-count').textContent = uncollected.length;
+  document.getElementById('stat-total').textContent = '$' + totalUncollected.toLocaleString();
+  document.getElementById('stat-collected').textContent = '$' + totalCollected.toLocaleString();
+}
+
+function renderTable() {
+  const filtered = getFilteredRecords();
+  const tbody = document.getElementById('table-body');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">目前沒有符合條件的應收款記錄</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((r, idx) => `
+    <tr data-id="${r.id}">
+      <td style="color:rgba(255,255,255,0.3);font-size:12px;">${idx + 1}</td>
+      <td><input type="text" value="${r.client}" onchange="updateField(${r.id},'client',this.value)"></td>
+      <td>
+        <select onchange="updateField(${r.id},'type',this.value)">
+          <option ${r.type==='清潔勞務'?'selected':''}>清潔勞務</option>
+          <option ${r.type==='病媒防治'?'selected':''}>病媒防治</option>
+        </select>
+      </td>
+      <td class="amount">
+        <input type="number" value="${r.amount}" onchange="updateField(${r.id},'amount',this.value);updateStats()">
+      </td>
+      <td><input type="text" value="${r.workdate}" onchange="updateField(${r.id},'workdate',this.value)"></td>
+      <td>
+        <select onchange="updateField(${r.id},'invoice',this.value)">
+          <option ${r.invoice==='未請款'?'selected':''}>未請款</option>
+          <option ${r.invoice==='已請款'?'selected':''}>已請款</option>
+          <option ${r.invoice==='請款中'?'selected':''}>請款中</option>
+        </select>
+      </td>
+      <td><input type="text" value="${r.note}" placeholder="備註" onchange="updateField(${r.id},'note',this.value)"></td>
+      <td>
+        <select onchange="updateField(${r.id},'status',this.value);updateStats();renderTable()">
+          <option ${r.status==='未收'?'selected':''}>未收</option>
+          <option ${r.status==='部分收款'?'selected':''}>部分收款</option>
+          <option ${r.status==='已收'?'selected':''}>已收</option>
+        </select>
+      </td>
+      <td><button class="btn-del" onclick="deleteRecord(${r.id})">🗑️ 刪除</button></td>
+    </tr>
+  `).join('');
+
+  updateStats();
+}
+
+function updateField(id, field, value) {
+  const rec = records.find(r => r.id === id);
+  if (rec) rec[field] = value;
+}
+
+function deleteRecord(id) {
+  const rec = records.find(r => r.id === id);
+  if (!rec) return;
+  if (confirm(`確定要刪除「${rec.client}」這筆應收款？`)) {
+    records = records.filter(r => r.id !== id);
+    renderTable();
+    updateStats();
+    showToast('✅ 已刪除');
+  }
+}
+
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('new-client').focus();
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('new-client').value = '';
+  document.getElementById('new-amount').value = '';
+  document.getElementById('new-workdate').value = '';
+  document.getElementById('new-note').value = '';
+}
+
+function addRecord() {
+  const client = document.getElementById('new-client').value.trim();
+  if (!client) { alert('請輸入客戶名稱'); return; }
+  const newRec = {
+    id: nextId++,
+    client,
+    type: document.getElementById('new-type').value,
+    amount: Number(document.getElementById('new-amount').value) || 0,
+    workdate: document.getElementById('new-workdate').value,
+    invoice: document.getElementById('new-invoice').value,
+    note: document.getElementById('new-note').value,
+    status: '未收'
+  };
+  records.push(newRec);
+  closeModal();
+  renderTable();
+  updateStats();
+  showToast('✅ 已新增「' + client + '」');
+}
+
+async function saveToSheet() {
+  showToast('⏳ 儲存中...');
+  try {
+    const payload = {
+      action: 'saveReceivables',
+      records: records,
+      timestamp: new Date().toLocaleString('zh-TW')
+    };
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    showToast('✅ 已儲存到試算表！');
+  } catch(e) {
+    showToast('⚠️ 儲存失敗，請檢查網路', '#E67E22');
+  }
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || '#27AE60';
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+// 點擊 modal 外部關閉
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// 初始化
+renderTable();
+updateStats();
+</script>
+</body>
+</html>
