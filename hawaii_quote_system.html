@@ -233,6 +233,7 @@ table.items-table td {
 
 .seal-wrap { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
 .seal-img { width: 70px; height: 70px; object-fit: contain; opacity: 0.85; }
+.seal-img:last-child { width: 44px; height: 44px; }
 </style>
 </head>
 <body>
@@ -360,7 +361,7 @@ function addRow(tbody) {
     '<td><input type="text" class="price-input" style="text-align:right;" placeholder="0" oninput="calcRow(this.closest(\'tr\'))"></td>' +
     '<td style="text-align:right;background:#fafafa;"><span class="sub-display"></span></td>' +
     '<td><input type="text" placeholder="備註"></td>' +
-    '<td style="text-align:center;width:36px;"><button class="del-btn" onclick="var w=this.closest('.quote-wrap');this.closest('tr').remove();calcTotal(w);w.querySelectorAll('table.items-table tbody tr').forEach(function(r,i){r.cells[0].textContent=i+1;})">✕</button></td>';
+    '<td style="text-align:center;width:36px;"><button class="del-btn" onclick="var w=this.closest(\'.quote-wrap\');this.closest(\'tr\').remove();calcTotal(w);w.querySelectorAll(\'table.items-table tbody tr\').forEach(function(r,i){r.cells[0].textContent=i+1;})">✕</button></td>';
   tbody.appendChild(tr);
 }
 
@@ -540,7 +541,7 @@ function createQuote(type) {
 
   document.getElementById('quotes-container').appendChild(wrap);
 
-  var tbody = wrap.querySelector('tbody');
+  var tbody = document.getElementById('tbody-' + qno);
   for (var i = 0; i < 3; i++) addRow(tbody);
   window.scrollTo(0, document.body.scrollHeight);
 }
@@ -560,6 +561,11 @@ function createInvoice(type) {
   var isPest = type === 'pest';
   var wrap = document.createElement('div');
   wrap.className = 'quote-wrap';
+
+  var sealHtml = '<div class="seal-wrap">' +
+    '<img class="seal-img" src="https://wallacemate.github.io/hawaii-tools/%E5%85%AC%E5%8F%B8%E5%A4%A7%E7%AB%A0_0.jpg">' +
+    '<img class="seal-img" src="https://wallacemate.github.io/hawaii-tools/%E5%85%AC%E5%8F%B8%E5%B0%8F%E7%AB%A0_0.jpg">' +
+    '</div>';
 
   wrap.innerHTML =
     '<div class="quote-header">' +
@@ -590,7 +596,7 @@ function createInvoice(type) {
     '<button class="add-row-btn" onclick="addRow(this.previousElementSibling.querySelector(\'tbody\'))">＋ 新增項目</button>' +
     '<div class="total-section"><table class="total-table">' +
       '<tr><td class="total-label">小　　計</td><td class="total-value"><span class="subtotal-val"></span></td></tr>' +
-      '<tr class="tax-row"><td class="total-label" style="position:relative;">營業稅（5%）<button class="tax-toggle" onclick="toggleTax(this.closest('.quote-wrap'))" title="開關稅金">✕</button></td><td class="total-value"><span class="tax-val"></span></td></tr>' +
+      '<tr class="tax-row"><td class="total-label" style="position:relative;">營業稅（5%）<button class="tax-toggle" onclick="toggleTax(this.closest(\'.quote-wrap\'))" title="開關稅金">✕</button></td><td class="total-value"><span class="tax-val"></span></td></tr>' +
       '<tr><td class="total-grand"><span class="total-label-text">含稅總計</span></td><td class="total-grand-value"><span class="total-val"></span></td></tr>' +
     '</table></div>' +
     '<div class="daxie"><span class="daxie-text">總計大寫：新台幣　　　　　　　元整</span></div>' +
@@ -619,22 +625,19 @@ function createInvoice(type) {
         '<div style="font-size:11px;color:#666;margin-bottom:4px;">' + (isPest ? '夏威夷除蟲達人　夏威夷實業社' : '夏威夷實業社') + '</div>' +
         '<div style="font-size:11px;color:#666;margin-bottom:4px;">地址：屏東市瑞華街 129 號</div>' +
         (isPest ? '<div style="font-size:11px;color:#666;margin-bottom:4px;">執照：環藥病媒字第 13-042 號</div>' : '') +
-        '<div class="seal-wrap">' +
-        '<img class="seal-img" src="https://wallacemate.github.io/hawaii-tools/%E5%85%AC%E5%8F%B8%E5%A4%A7%E7%AB%A0_0.jpg">' +
-        '<img class="seal-img" src="https://wallacemate.github.io/hawaii-tools/%E5%85%AC%E5%8F%B8%E5%B0%8F%E7%AB%A0_0.jpg">' +
-        '</div>' +
+        sealHtml +
         '<div class="sign-line"><span>日期：</span><input type="text"></div>' +
       '</div>' +
     '</div>' +
     '<div class="quote-footer">夏威夷實業社｜屏東市瑞華街129號｜0908-959-655｜統編：88762480</div>' +
     '<div class="form-actions">' +
       '<button class="form-btn form-btn-del" onclick="this.closest(\'.quote-wrap\').remove()">🗑️ 刪除</button>' +
-      '<button class="form-btn form-btn-save" onclick="saveInvoiceToSheets(this.closest(\'.quote-wrap\'), \'' + qno + '\', \'' + type + \')">💾 儲存到試算表</button>' +
-      '<button class="form-btn form-btn-pdf" onclick="saveAsPDF(this.closest(\'.quote-wrap\'), \'' + qno + \')">📄 存檔PDF</button>' +
+      '<button class="form-btn form-btn-save" onclick="saveInvoiceToSheets(this.closest(\'.quote-wrap\'), \'' + qno + '\', \'' + type + '\')">💾 儲存到試算表</button>' +
+      '<button class="form-btn form-btn-pdf" onclick="saveAsPDF(this.closest(\'.quote-wrap\'), \'' + qno + '\')">📄 存檔PDF</button>' +
     '</div>';
 
   document.getElementById('quotes-container').appendChild(wrap);
-  var tbody = wrap.querySelector('tbody');
+  var tbody = document.getElementById('tbody-inv-' + qno);
   for (var i = 0; i < 3; i++) addRow(tbody);
   window.scrollTo(0, document.body.scrollHeight);
 }

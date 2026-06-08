@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏威夷實業社 每日工作日誌</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --navy2: #243460;
+  --gold: #C9A84C;
+  --green: #27AE60;
+  --red: #E74C3C;
+  --blue: #2E75B6;
+  --light: #F0F4F8;
+  --border: #ddd;
+  --text: #2c2c2c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: #f0f2f5;
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* 頂部標題 */
+.header {
+  background: var(--navy);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header-left .title { font-size: 20px; font-weight: 700; }
+.header-left .sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+.header-right { display: flex; gap: 8px; flex-wrap: wrap; }
+.hbtn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+}
+.hbtn-gold { background: var(--gold); color: var(--navy); }
+.hbtn-outline { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3); }
+
+/* 主體佈局 */
+.main {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 60px);
+}
+
+/* 左側 */
+.sidebar {
+  background: var(--navy2);
+  padding: 20px 16px;
+  color: white;
+}
+
+.month-selector {
+  margin-bottom: 20px;
+}
+.month-selector label { font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing: 1px; margin-bottom: 6px; display: block; }
+.month-selector input[type="month"] {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: white;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+.stat-card.full { grid-column: span 2; }
+.stat-label { font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 4px; letter-spacing: 1px; }
+.stat-value { font-size: 20px; font-weight: 700; color: white; }
+.stat-value.gold { color: var(--gold); }
+.stat-value.green { color: #4CAF50; }
+.stat-value.red { color: #EF5350; }
+
+.sidebar-section-title {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 10px;
+  margin-top: 16px;
+}
+
+.record-list { display: flex; flex-direction: column; gap: 6px; max-height: 400px; overflow-y: auto; }
+.record-item {
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.record-item:hover { border-color: rgba(201,168,76,0.4); background: rgba(255,255,255,0.1); }
+.record-item-date { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 3px; }
+.record-item-name { font-size: 13px; font-weight: 500; color: white; }
+.record-item-amount { font-size: 12px; color: var(--gold); margin-top: 2px; }
+.record-item-badges { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+.badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.badge-clean { background: rgba(46,117,182,0.3); color: #7EC8FF; }
+.badge-pest { background: rgba(39,174,96,0.3); color: #7DFFB3; }
+.badge-paid { background: rgba(39,174,96,0.3); color: #7DFFB3; }
+.badge-unpaid { background: rgba(231,76,60,0.3); color: #FFB3AD; }
+.badge-half { background: rgba(201,168,76,0.3); color: var(--gold); }
+.badge-full { background: rgba(255,255,255,0.15); color: white; }
+.badge-rest { background: rgba(100,100,100,0.3); color: #aaa; }
+
+/* 右側 */
+.content { padding: 24px; overflow-y: auto; }
+
+.content-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.content-sub { font-size: 13px; color: #888; margin-bottom: 24px; }
+
+/* 表單 */
+.form-card {
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  margin-bottom: 24px;
+}
+.form-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--light);
+}
+
+.form-row { display: grid; gap: 12px; margin-bottom: 14px; }
+.form-row.col-2 { grid-template-columns: 1fr 1fr; }
+.form-row.col-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-row.col-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 11px; font-weight: 600; color: #666; letter-spacing: 0.5px; }
+
+.form-input, .form-select, .form-textarea {
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  transition: border-color 0.2s;
+  background: white;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+.form-textarea { resize: vertical; min-height: 70px; }
+
+/* 時間 + 半天判定 */
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.time-row span { color: #888; font-size: 13px; }
+.time-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--light);
+  color: #888;
+  white-space: nowrap;
+}
+.time-badge.half { background: rgba(201,168,76,0.15); color: var(--gold); }
+.time-badge.full { background: rgba(26,39,68,0.1); color: var(--navy); }
+
+/* 人員選擇 */
+.staff-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.staff-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: white;
+  color: #555;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.staff-chip.selected {
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+}
+
+/* 休息日 */
+.rest-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+.rest-toggle.active {
+  background: rgba(231,76,60,0.08);
+  border-color: var(--red);
+  color: var(--red);
+}
+.rest-toggle input { display: none; }
+.rest-label { font-size: 13px; }
+
+/* 收款狀態 */
+.status-row { display: flex; gap: 8px; }
+.status-btn {
+  flex: 1;
+  padding: 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  background: white;
+  transition: all 0.2s;
+  text-align: center;
+}
+.status-btn.paid.selected { background: rgba(39,174,96,0.1); border-color: var(--green); color: var(--green); }
+.status-btn.unpaid.selected { background: rgba(231,76,60,0.1); border-color: var(--red); color: var(--red); }
+
+/* 送出按鈕 */
+.submit-row { display: flex; gap: 10px; margin-top: 4px; }
+.submit-btn {
+  padding: 11px 24px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.submit-btn-primary { background: var(--navy); color: white; flex: 1; }
+.submit-btn-secondary { background: var(--light); color: #555; }
+.submit-btn-danger { background: rgba(231,76,60,0.1); color: var(--red); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--green);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  display: none;
+  z-index: 999;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  max-width: 320px;
+}
+
+/* 響應式 */
+@media (max-width: 768px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { order: 2; }
+  .content { order: 1; }
+  .form-row.col-3, .form-row.col-4 { grid-template-columns: 1fr 1fr; }
+  .form-row.col-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="title">📓 夏威夷實業社 每日工作日誌</div>
+    <div class="sub">資料自動存入 Google 試算表，以月份分頁儲存</div>
+  </div>
+  <div class="header-right">
+    <button class="hbtn hbtn-outline" onclick="exportCSV()">📥 匯出 CSV</button>
+    <button class="hbtn hbtn-gold" onclick="sendToTelegram()">📤 發送今日摘要</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 左側統計 -->
+  <div class="sidebar">
+    <div class="month-selector">
+      <label>查看月份</label>
+      <input type="month" id="viewMonth" onchange="loadMonthData()">
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">工作筆數</div>
+        <div class="stat-value" id="statCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">工作天數</div>
+        <div class="stat-value" id="statDays">0</div>
+      </div>
+      <div class="stat-card full">
+        <div class="stat-label">本月應收</div>
+        <div class="stat-value gold" id="statIncome">$0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">已收款</div>
+        <div class="stat-value green" id="statPaid">$0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">未收款</div>
+        <div class="stat-value red" id="statUnpaid">$0</div>
+      </div>
+      <div class="stat-card full">
+        <div class="stat-label">本月支出</div>
+        <div class="stat-value red" id="statExpense">$0</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-title">本月紀錄</div>
+    <div class="record-list" id="recordList">
+      <div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:20px;">尚無紀錄</div>
+    </div>
+  </div>
+
+  <!-- 右側表單 -->
+  <div class="content">
+    <div class="content-title">新增工作紀錄</div>
+    <div class="content-sub">每天完工後記錄，資料自動上傳雲端</div>
+
+    <div class="form-card">
+      <div class="form-card-title">📅 基本資訊</div>
+
+      <div class="form-row col-3">
+        <div class="form-group">
+          <label class="form-label">日期</label>
+          <input type="date" class="form-input" id="fDate">
+        </div>
+        <div class="form-group">
+          <label class="form-label">星期</label>
+          <input type="text" class="form-input" id="fWeekday" readonly style="background:#f9f9f9;color:#888;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">服務類型</label>
+          <select class="form-select" id="fType">
+            <option value="清潔">清潔勞務</option>
+            <option value="病媒防治">病媒防治</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">施工時間</label>
+          <div class="time-row">
+            <input type="time" class="form-input" id="fStart" value="08:00" oninput="calcTimeBadge()" style="flex:1;">
+            <span>到</span>
+            <input type="time" class="form-input" id="fEnd" value="17:00" oninput="calcTimeBadge()" style="flex:1;">
+            <div class="time-badge full" id="timeBadge">全天</div>
+          </div>
+        </div>
+        <div class="form-group" style="justify-content:flex-end;">
+          <label class="form-label">休息日</label>
+          <label class="rest-toggle" id="restToggle" onclick="event.preventDefault();toggleRest()">
+            <input type="checkbox" id="fRest">
+            <span class="rest-label" id="restLabel">☐ 標記為休息日</span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">🏢 案件資訊</div>
+
+      <div class="form-row col-2">
+        <div class="form-group">
+          <label class="form-label">案名</label>
+          <input type="text" class="form-input" id="fJobName" placeholder="例：晨間廚房總部例清">
+        </div>
+        <div class="form-group">
+          <label class="form-label">地點</label>
+          <input type="text" class="form-input" id="fLocation" placeholder="施工或服務地點">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">派工人員（點擊快速加入）</label>
+        <div class="staff-chips" id="staffChips">
+          <button class="staff-chip" onclick="toggleStaff(this, '唐懷斌')">唐懷斌</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '唐晢語')">唐晢語</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '林春宸')">林春宸</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '林春岑')">林春岑</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '胡婷芬')">胡婷芬</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '范氏明')">范氏明</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '董厚謙')">董厚謙</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '蔡承欣')">蔡承欣</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '許文珍')">許文珍</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '陳韋盛')">陳韋盛</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '黃于哲')">黃于哲</button>
+          <button class="staff-chip" onclick="toggleStaff(this, '黃詩峰')">黃詩峰</button>
+        </div>
+        <input type="text" class="form-input" id="fStaff" placeholder="已選人員會顯示在這裡" readonly style="margin-top:8px;background:#f9f9f9;">
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">💰 財務資訊</div>
+
+      <div class="form-row col-3">
+        <div class="form-group">
+          <label class="form-label">應收金額（元）</label>
+          <input type="number" class="form-input" id="fIncome" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">支出金額（元）</label>
+          <input type="number" class="form-input" id="fExpense" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">入賬日期</label>
+          <input type="text" class="form-input" id="fPayDate" placeholder="例：6/7 現金入帳">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">收款狀態</label>
+        <div class="status-row">
+          <button class="status-btn unpaid selected" id="btnUnpaid" onclick="setStatus('未收款')">⏳ 未收款</button>
+          <button class="status-btn paid" id="btnPaid" onclick="setStatus('已收款')">✅ 已收款</button>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:12px;">
+        <label class="form-label">備註</label>
+        <textarea class="form-textarea" id="fNote" placeholder="請款狀態、領現、特殊支出、補充說明..."></textarea>
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button class="submit-btn submit-btn-danger" onclick="clearForm()">🗑️ 清空</button>
+      <button class="submit-btn submit-btn-secondary" onclick="saveAndNext()">儲存並新增下一筆</button>
+      <button class="submit-btn submit-btn-primary" onclick="saveRecord()">💾 儲存紀錄</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 設定 =====
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuJ9v5KvA_NI8iFfkgXmZ8sGooJtSMEF9F2F2QlPdxxgkW8xZxhM-lN3g37Jb4NiJV9g/exec';
+var BOT_TOKEN = ''; // 選填，如果要發送 Telegram
+var CHAT_ID = '8978889851';
+
+var selectedStaff = [];
+var paymentStatus = '未收款';
+var isRest = false;
+var records = [];
+
+// ===== 初始化 =====
+window.onload = function() {
+  var today = new Date();
+  document.getElementById('fDate').value = today.toISOString().split('T')[0];
+  document.getElementById('viewMonth').value = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+  updateWeekday();
+  calcTimeBadge();
+  loadLocalRecords();
+};
+
+function updateWeekday() {
+  var d = new Date(document.getElementById('fDate').value);
+  var days = ['日','一','二','三','四','五','六'];
+  document.getElementById('fWeekday').value = '星期' + days[d.getDay()];
+}
+
+document.getElementById('fDate').addEventListener('change', updateWeekday);
+
+// ===== 時間判定 =====
+function calcTimeBadge() {
+  var start = document.getElementById('fStart').value;
+  var end = document.getElementById('fEnd').value;
+  var badge = document.getElementById('timeBadge');
+
+  if (!start || !end) { badge.textContent = '-'; badge.className = 'time-badge'; return; }
+
+  var sh = parseInt(start.split(':')[0]);
+  var sm = parseInt(start.split(':')[1]);
+  var eh = parseInt(end.split(':')[0]);
+  var em = parseInt(end.split(':')[1]);
+
+  // 上午半天：08:00-12:00
+  if (sh === 8 && sm === 0 && eh === 12 && em === 0) {
+    badge.textContent = '上午半天';
+    badge.className = 'time-badge half';
+    return;
+  }
+  // 下午半天：13:00-17:00
+  if (sh === 13 && sm === 0 && eh === 17 && em === 0) {
+    badge.textContent = '下午半天';
+    badge.className = 'time-badge half';
+    return;
+  }
+  // 其他視為全天
+  badge.textContent = '全天';
+  badge.className = 'time-badge full';
+}
+
+// ===== 休息日 =====
+function toggleRest() {
+  isRest = !isRest;
+  var toggle = document.getElementById('restToggle');
+  var label = document.getElementById('restLabel');
+  if (isRest) {
+    toggle.classList.add('active');
+    label.textContent = '☑ 休息日';
+  } else {
+    toggle.classList.remove('active');
+    label.textContent = '☐ 標記為休息日';
+  }
+}
+
+// ===== 人員選擇 =====
+function toggleStaff(el, name) {
+  var idx = selectedStaff.indexOf(name);
+  if (idx === -1) {
+    selectedStaff.push(name);
+    el.classList.add('selected');
+  } else {
+    selectedStaff.splice(idx, 1);
+    el.classList.remove('selected');
+  }
+  document.getElementById('fStaff').value = selectedStaff.join('、');
+}
+
+// ===== 收款狀態 =====
+function setStatus(status) {
+  paymentStatus = status;
+  document.getElementById('btnPaid').classList.toggle('selected', status === '已收款');
+  document.getElementById('btnUnpaid').classList.toggle('selected', status === '未收款');
+}
+
+// ===== Toast =====
+function showToast(msg, color) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || '#27AE60';
+  t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 3500);
+}
+
+// ===== 組合紀錄 =====
+function buildRecord() {
+  var date = document.getElementById('fDate').value;
+  var weekday = document.getElementById('fWeekday').value;
+  var type = document.getElementById('fType').value;
+  var start = document.getElementById('fStart').value;
+  var end = document.getElementById('fEnd').value;
+  var badge = document.getElementById('timeBadge').textContent;
+  var jobName = document.getElementById('fJobName').value.trim();
+  var location = document.getElementById('fLocation').value.trim();
+  var staff = document.getElementById('fStaff').value;
+  var income = parseFloat(document.getElementById('fIncome').value) || 0;
+  var expense = parseFloat(document.getElementById('fExpense').value) || 0;
+  var payDate = document.getElementById('fPayDate').value.trim();
+  var note = document.getElementById('fNote').value.trim();
+
+  return {
+    date: date,
+    weekday: weekday,
+    type: type,
+    start: start,
+    end: end,
+    duration: badge,
+    isRest: isRest,
+    jobName: jobName,
+    location: location,
+    staff: staff,
+    income: income,
+    expense: expense,
+    payDate: payDate,
+    paymentStatus: paymentStatus,
+    note: note,
+    timestamp: new Date().toISOString(),
+    month: date.substring(0, 7)
+  };
+}
+
+// ===== 儲存紀錄 =====
+function saveRecord() {
+  var rec = buildRecord();
+  if (!rec.date) { showToast('❌ 請填入日期', '#E74C3C'); return; }
+
+  // 存本機
+  var key = 'hawaii_log_' + rec.month;
+  var existing = JSON.parse(localStorage.getItem(key) || '[]');
+  existing.push(rec);
+  localStorage.setItem(key, JSON.stringify(existing));
+
+  // 存雲端
+  saveToSheets(rec);
+
+  loadLocalRecords();
+  showToast('✅ 紀錄已儲存！');
+}
+
+function saveAndNext() {
+  saveRecord();
+  var date = document.getElementById('fDate').value;
+  var type = document.getElementById('fType').value;
+  clearForm();
+  document.getElementById('fDate').value = date;
+  document.getElementById('fType').value = type;
+  updateWeekday();
+}
+
+// ===== 存到 Google 試算表 =====
+function saveToSheets(rec) {
+  var payload = {
+    action: 'saveDailyLog',
+    month: rec.month,
+    date: rec.date,
+    weekday: rec.weekday,
+    type: rec.type,
+    start: rec.start,
+    end: rec.end,
+    duration: rec.duration,
+    isRest: rec.isRest ? '是' : '否',
+    jobName: rec.jobName,
+    location: rec.location,
+    staff: rec.staff,
+    income: rec.income,
+    expense: rec.expense,
+    payDate: rec.payDate,
+    paymentStatus: rec.paymentStatus,
+    note: rec.note,
+    timestamp: rec.timestamp
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (!data.success) {
+      showToast('⚠️ 雲端儲存失敗，已存本機', '#E67E22');
+    }
+  })
+  .catch(function() {
+    showToast('⚠️ 網路異常，已存本機', '#E67E22');
+  });
+}
+
+// ===== 載入本月紀錄 =====
+function loadLocalRecords() {
+  var month = document.getElementById('viewMonth').value;
+  var key = 'hawaii_log_' + month;
+  records = JSON.parse(localStorage.getItem(key) || '[]');
+  renderRecords();
+  calcStats();
+}
+
+function loadMonthData() { loadLocalRecords(); }
+
+function renderRecords() {
+  var list = document.getElementById('recordList');
+  if (records.length === 0) {
+    list.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:20px;">尚無紀錄</div>';
+    return;
+  }
+  list.innerHTML = records.slice().reverse().map(function(r, i) {
+    var ri = records.length - 1 - i;
+    return '<div class="record-item" onclick="loadRecord(' + ri + ')">' +
+      '<div class="record-item-date">' + r.date + ' ' + r.weekday + '</div>' +
+      '<div class="record-item-name">' + (r.isRest ? '🔴 休息日' : (r.jobName || '（未填案名）')) + '</div>' +
+      (r.income > 0 ? '<div class="record-item-amount">應收 $' + r.income.toLocaleString() + '</div>' : '') +
+      '<div class="record-item-badges">' +
+        (r.type ? '<span class="badge ' + (r.type === '清潔' ? 'badge-clean' : 'badge-pest') + '">' + r.type + '</span>' : '') +
+        (r.duration ? '<span class="badge ' + (r.duration.includes('半天') ? 'badge-half' : 'badge-full') + '">' + r.duration + '</span>' : '') +
+        (r.paymentStatus ? '<span class="badge ' + (r.paymentStatus === '已收款' ? 'badge-paid' : 'badge-unpaid') + '">' + r.paymentStatus + '</span>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function loadRecord(idx) {
+  var r = records[idx];
+  document.getElementById('fDate').value = r.date;
+  document.getElementById('fType').value = r.type || '清潔';
+  document.getElementById('fStart').value = r.start;
+  document.getElementById('fEnd').value = r.end;
+  document.getElementById('fJobName').value = r.jobName;
+  document.getElementById('fLocation').value = r.location;
+  document.getElementById('fIncome').value = r.income;
+  document.getElementById('fExpense').value = r.expense;
+  document.getElementById('fPayDate').value = r.payDate;
+  document.getElementById('fNote').value = r.note;
+  updateWeekday();
+  calcTimeBadge();
+  setStatus(r.paymentStatus || '未收款');
+
+  // 重設人員
+  selectedStaff = r.staff ? r.staff.split('、').filter(Boolean) : [];
+  document.getElementById('fStaff').value = r.staff || '';
+  document.querySelectorAll('.staff-chip').forEach(function(chip) {
+    chip.classList.toggle('selected', selectedStaff.indexOf(chip.textContent) !== -1);
+  });
+
+  // 休息日
+  isRest = r.isRest;
+  var toggle = document.getElementById('restToggle');
+  var label = document.getElementById('restLabel');
+  if (isRest) { toggle.classList.add('active'); label.textContent = '☑ 休息日'; }
+  else { toggle.classList.remove('active'); label.textContent = '☐ 標記為休息日'; }
+
+  window.scrollTo(0, 0);
+}
+
+function calcStats() {
+  var totalIncome = 0, totalExpense = 0, paid = 0, unpaid = 0;
+  var workDays = new Set();
+
+  records.forEach(function(r) {
+    totalIncome += r.income || 0;
+    totalExpense += r.expense || 0;
+    if (r.paymentStatus === '已收款') paid += r.income || 0;
+    else unpaid += r.income || 0;
+    if (!r.isRest && r.date) workDays.add(r.date);
+  });
+
+  document.getElementById('statCount').textContent = records.length;
+  document.getElementById('statDays').textContent = workDays.size;
+  document.getElementById('statIncome').textContent = '$' + totalIncome.toLocaleString();
+  document.getElementById('statPaid').textContent = '$' + paid.toLocaleString();
+  document.getElementById('statUnpaid').textContent = '$' + unpaid.toLocaleString();
+  document.getElementById('statExpense').textContent = '$' + totalExpense.toLocaleString();
+}
+
+// ===== 清空表單 =====
+function clearForm() {
+  document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('fType').value = '清潔';
+  document.getElementById('fStart').value = '08:00';
+  document.getElementById('fEnd').value = '17:00';
+  document.getElementById('fJobName').value = '';
+  document.getElementById('fLocation').value = '';
+  document.getElementById('fIncome').value = '0';
+  document.getElementById('fExpense').value = '0';
+  document.getElementById('fPayDate').value = '';
+  document.getElementById('fNote').value = '';
+  document.getElementById('fStaff').value = '';
+  selectedStaff = [];
+  document.querySelectorAll('.staff-chip').forEach(function(c) { c.classList.remove('selected'); });
+  setStatus('未收款');
+  isRest = false;
+  document.getElementById('restToggle').classList.remove('active');
+  document.getElementById('restLabel').textContent = '☐ 標記為休息日';
+  updateWeekday();
+  calcTimeBadge();
+}
+
+// ===== 匯出 CSV =====
+function exportCSV() {
+  var month = document.getElementById('viewMonth').value;
+  var key = 'hawaii_log_' + month;
+  var recs = JSON.parse(localStorage.getItem(key) || '[]');
+  if (recs.length === 0) { showToast('本月尚無紀錄', '#E67E22'); return; }
+
+  var headers = ['日期','星期','服務類型','開始','結束','全天/半天','休息日','案名','地點','人員','應收','支出','入賬日期','收款狀態','備註'];
+  var rows = recs.map(function(r) {
+    return [r.date, r.weekday, r.type, r.start, r.end, r.duration, r.isRest?'是':'否', r.jobName, r.location, r.staff, r.income, r.expense, r.payDate, r.paymentStatus, r.note].map(function(v) { return '"' + String(v||'').replace(/"/g,'""') + '"'; }).join(',');
+  });
+
+  var csv = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '工作日誌_' + month + '.csv';
+  a.click();
+}
+
+// ===== 發送 Telegram 今日摘要 =====
+function sendToTelegram() {
+  var today = new Date().toISOString().split('T')[0];
+  var month = today.substring(0, 7);
+  var key = 'hawaii_log_' + month;
+  var recs = JSON.parse(localStorage.getItem(key) || '[]');
+  var todayRecs = recs.filter(function(r) { return r.date === today; });
+
+  var msg = '📓 *今日工作日誌摘要*\n';
+  msg += today + '\n\n';
+
+  if (todayRecs.length === 0) {
+    msg += '今日尚無工作紀錄';
+  } else {
+    var totalIncome = 0;
+    todayRecs.forEach(function(r, i) {
+      msg += (i+1) + '. ' + (r.jobName || '未填案名') + '\n';
+      if (r.location) msg += '   📍 ' + r.location + '\n';
+      if (r.staff) msg += '   👷 ' + r.staff + '\n';
+      if (r.type) msg += '   🔧 ' + r.type + '\n';
+      if (r.duration) msg += '   ⏰ ' + r.start + '-' + r.end + '（' + r.duration + '）\n';
+      if (r.income) msg += '   💰 應收：$' + r.income.toLocaleString() + '（' + r.paymentStatus + '）\n';
+      msg += '\n';
+      totalIncome += r.income || 0;
+    });
+    msg += '─────────────\n';
+    msg += '今日應收合計：$' + totalIncome.toLocaleString();
+  }
+
+  var payload = {
+    action: 'sendTelegram',
+    message: msg
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+  .then(function() { showToast('✅ 今日摘要已發送到 Telegram！'); })
+  .catch(function() { showToast('❌ 發送失敗', '#E74C3C'); });
+}
+</script>
+</body>
+</html>
