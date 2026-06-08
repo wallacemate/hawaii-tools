@@ -67,7 +67,7 @@ body {
 }
 .quote-header-left .company { font-size: 18px; font-weight: 700; }
 .quote-header-left .license { font-size: 11px; color: var(--gold); margin-top: 3px; }
-.quote-header-center { font-size: 22px; font-weight: 700; letter-spacing: 4px; }
+.quote-header-center { font-size: 22px; font-weight: 700; letter-spacing: 6px; text-indent: 6px; }
 .quote-header-right { text-align: right; }
 .quote-header-right .qno { font-size: 13px; color: var(--gold); font-weight: 700; }
 .quote-header-right .qno-label { font-size: 10px; color: #aaa; }
@@ -230,6 +230,9 @@ table.items-table td {
   .quote-wrap { margin: 0; max-width: 100%; border: 2px solid var(--navy); }
   @page { size: A4 portrait; margin: 10mm; }
 }
+
+.seal-wrap { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.seal-img { width: 70px; height: 70px; object-fit: contain; opacity: 0.85; }
 </style>
 </head>
 <body>
@@ -357,7 +360,7 @@ function addRow(tbody) {
     '<td><input type="text" class="price-input" style="text-align:right;" placeholder="0" oninput="calcRow(this.closest(\'tr\'))"></td>' +
     '<td style="text-align:right;background:#fafafa;"><span class="sub-display"></span></td>' +
     '<td><input type="text" placeholder="備註"></td>' +
-    '<td style="text-align:center;width:36px;"><button class="del-btn" onclick="this.closest(\'tr\').remove();calcTotal(this.closest(\'.quote-wrap\'))">✕</button></td>';
+    '<td style="text-align:center;width:36px;"><button class="del-btn" onclick="var w=this.closest('.quote-wrap');this.closest('tr').remove();calcTotal(w);w.querySelectorAll('table.items-table tbody tr').forEach(function(r,i){r.cells[0].textContent=i+1;})">✕</button></td>';
   tbody.appendChild(tr);
 }
 
@@ -445,7 +448,7 @@ function saveAsPDF(wrap, qno) {
 
   var win = window.open('', '_blank');
   win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + suggestName + '</title>' +
-    '<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;}.quote-wrap{border:2px solid #1a2744;}.quote-header{background:#1a2744;color:white;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}.quote-header-left .company{font-size:18px;font-weight:700;}.quote-header-left .license{font-size:11px;color:#C9A84C;}.quote-header-center{font-size:22px;font-weight:700;letter-spacing:4px;}.quote-header-right{text-align:right;}.qno{font-size:13px;color:#C9A84C;font-weight:700;}.qno-label{font-size:10px;color:#aaa;}.section-bar{background:#2E75B6;color:white;font-size:13px;font-weight:700;padding:5px 12px;}table.info-table{width:100%;border-collapse:collapse;table-layout:fixed;}table.info-table td{border:1px solid #ccc;padding:0;}.lbl{background:#F0F4F8;font-weight:700;font-size:12px;color:#1a2744;padding:6px 10px;text-align:center;white-space:nowrap;width:90px;}.val{padding:3px 8px;font-size:13px;}input{width:100%;border:none;font-size:13px;padding:3px 4px;background:transparent;color:#333;}table.items-table{width:100%;border-collapse:collapse;table-layout:fixed;}table.items-table th{background:#1a2744;color:white;font-size:12px;padding:7px 8px;text-align:center;border:1px solid #333;}table.items-table td{border:1px solid #ccc;padding:4px 6px;font-size:13px;}.total-section{display:flex;justify-content:flex-end;border-top:2px solid #1a2744;}.total-table{width:320px;border-collapse:collapse;}.total-table td{border:1px solid #ccc;padding:5px 10px;font-size:13px;}.total-label{background:#F0F4F8;font-weight:700;color:#1a2744;text-align:center;width:120px;}.total-value{text-align:right;}.total-grand{background:#1a2744;color:white;font-weight:700;font-size:14px;text-align:center;}.total-grand-value{background:#C9A84C;color:#1a2744;font-weight:700;font-size:14px;text-align:right;}.daxie{background:#F0F4F8;padding:6px 12px;font-size:12px;color:#1a2744;font-weight:700;border-top:1px solid #ccc;border-bottom:1px solid #ccc;}.bottom-section{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #ccc;}.bottom-left,.bottom-right{padding:10px 12px;font-size:12px;color:#444;line-height:1.8;}.bottom-left{border-right:1px solid #ccc;}.bottom-title{font-weight:700;color:#1a2744;margin-bottom:4px;font-size:13px;}.sign-section{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #ccc;}.sign-box{padding:8px 12px;min-height:90px;}.sign-box:first-child{border-right:1px solid #ccc;}.sign-title{font-size:12px;font-weight:700;color:#1a2744;background:#F0F4F8;text-align:center;padding:4px;margin:-8px -12px 8px;border-bottom:1px solid #ccc;}.sign-line{margin-top:8px;border-bottom:1px solid #bbb;font-size:12px;color:#777;padding-bottom:2px;display:flex;align-items:center;gap:6px;}.sign-line input{flex:1;border:none;font-size:12px;}.quote-footer{text-align:center;font-size:10px;color:#999;padding:6px;border-top:1px solid #eee;}.form-actions,.del-btn,.add-row-btn,.tax-row.hidden{display:none!important;}@page{size:A4 portrait;margin:10mm;}</style>' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;}.quote-wrap{border:2px solid #1a2744;}.quote-header{background:#1a2744;color:white;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}.quote-header-left .company{font-size:18px;font-weight:700;}.quote-header-left .license{font-size:11px;color:#C9A84C;}.quote-header-center{font-size:22px;font-weight:700;letter-spacing:6px;text-indent:6px;}.quote-header-right{text-align:right;}.qno{font-size:13px;color:#C9A84C;font-weight:700;}.qno-label{font-size:10px;color:#aaa;}.section-bar{background:#2E75B6;color:white;font-size:13px;font-weight:700;padding:5px 12px;}table.info-table{width:100%;border-collapse:collapse;table-layout:fixed;}table.info-table td{border:1px solid #ccc;padding:0;}.lbl{background:#F0F4F8;font-weight:700;font-size:12px;color:#1a2744;padding:6px 10px;text-align:center;white-space:nowrap;width:90px;}.val{padding:3px 8px;font-size:13px;}input{width:100%;border:none;font-size:13px;padding:3px 4px;background:transparent;color:#333;}table.items-table{width:100%;border-collapse:collapse;table-layout:fixed;}table.items-table th{background:#1a2744;color:white;font-size:12px;padding:7px 8px;text-align:center;border:1px solid #333;}table.items-table td{border:1px solid #ccc;padding:4px 6px;font-size:13px;}.total-section{display:flex;justify-content:flex-end;border-top:2px solid #1a2744;}.total-table{width:320px;border-collapse:collapse;}.total-table td{border:1px solid #ccc;padding:5px 10px;font-size:13px;}.total-label{background:#F0F4F8;font-weight:700;color:#1a2744;text-align:center;width:120px;}.total-value{text-align:right;}.total-grand{background:#1a2744;color:white;font-weight:700;font-size:14px;text-align:center;}.total-grand-value{background:#C9A84C;color:#1a2744;font-weight:700;font-size:14px;text-align:right;}.daxie{background:#F0F4F8;padding:6px 12px;font-size:12px;color:#1a2744;font-weight:700;border-top:1px solid #ccc;border-bottom:1px solid #ccc;}.bottom-section{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #ccc;}.bottom-left,.bottom-right{padding:10px 12px;font-size:12px;color:#444;line-height:1.8;}.bottom-left{border-right:1px solid #ccc;}.bottom-title{font-weight:700;color:#1a2744;margin-bottom:4px;font-size:13px;}.sign-section{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #ccc;}.sign-box{padding:8px 12px;min-height:90px;}.sign-box:first-child{border-right:1px solid #ccc;}.sign-title{font-size:12px;font-weight:700;color:#1a2744;background:#F0F4F8;text-align:center;padding:4px;margin:-8px -12px 8px;border-bottom:1px solid #ccc;}.sign-line{margin-top:8px;border-bottom:1px solid #bbb;font-size:12px;color:#777;padding-bottom:2px;display:flex;align-items:center;gap:6px;}.sign-line input{flex:1;border:none;font-size:12px;}.quote-footer{text-align:center;font-size:10px;color:#999;padding:6px;border-top:1px solid #eee;}.form-actions,.del-btn,.add-row-btn,.tax-row.hidden{display:none!important;}@page{size:A4 portrait;margin:10mm;}</style>' +
     '</head><body>' + clone.outerHTML +
     '<script>window.onload=function(){window.print();setTimeout(function(){window.close();},2000);};<\/script></body></html>');
   win.document.close();
@@ -465,7 +468,7 @@ function createQuote(type) {
         '<div class="company">' + (isPest ? '夏威夷除蟲達人' : '夏威夷實業社') + '</div>' +
         '<div class="license">' + (isPest ? '執照：環藥病媒字第 13-042 號' : '專業清潔・值得信賴') + '</div>' +
       '</div>' +
-      '<div class="quote-header-center">' + (isPest ? '病媒防治' : '清潔服務') + ' 報 價 單</div>' +
+      '<div class="quote-header-center">' + (isPest ? '病媒防治' : '清潔服務') + '報價單</div>' +
       '<div class="quote-header-right"><div class="qno-label">報價單號</div><div class="qno">' + qno + '</div></div>' +
     '</div>' +
     '<table class="info-table"><tr>' +
@@ -521,7 +524,10 @@ function createQuote(type) {
         '<div style="font-size:11px;color:#666;margin-bottom:4px;">' + (isPest ? '夏威夷除蟲達人　夏威夷實業社' : '夏威夷實業社') + '</div>' +
         '<div style="font-size:11px;color:#666;margin-bottom:4px;">地址：屏東市瑞華街 129 號</div>' +
         (isPest ? '<div style="font-size:11px;color:#666;margin-bottom:4px;">執照：環藥病媒字第 13-042 號</div>' : '') +
-        '<div class="sign-line"><span>負責人：</span><input type="text" placeholder="董厚謙"></div>' +
+        '<div class="seal-wrap">' +
+        '<img class="seal-img" src="https://wallacemate.github.io/hawaii-tools/%E5%85%AC%E5%8F%B8%E5%A4%A7%E7%AB%A0_0.jpg">' +
+        '<img class="seal-img" src="https://wallacemate.github.io/hawaii-tools/%E5%85%AC%E5%8F%B8%E5%B0%8F%E7%AB%A0_0.jpg">' +
+        '</div>' +
         '<div class="sign-line"><span>日期：</span><input type="text"></div>' +
       '</div>' +
     '</div>' +
@@ -555,74 +561,77 @@ function createInvoice(type) {
   var wrap = document.createElement('div');
   wrap.className = 'quote-wrap';
 
-  wrap.innerHTML = `
-    <div class="quote-header">
-      <div class="quote-header-left">
-        <div class="company">${isPest ? '夏威夷除蟲達人' : '夏威夷實業社'}</div>
-        <div class="license">${isPest ? '執照：環藥病媒字第 13-042 號' : '專業清潔・值得信賴'}</div>
-      </div>
-      <div class="quote-header-center">${isPest ? '病媒防治' : '清潔服務'} 請 款 單</div>
-      <div class="quote-header-right"><div class="qno-label">請款單號</div><div class="qno">${qno}</div></div>
-    </div>
-    <table class="info-table"><tr>
-      <td class="lbl">請款單號</td><td class="val"><input type="text" value="${qno}"></td>
-      <td class="lbl">請款日期</td><td class="val"><input type="text" value="${today}"></td>
-    </tr><tr>
-      <td class="lbl">對應報價單</td><td class="val"><input type="text" placeholder="對應報價單號（選填）"></td>
-      <td class="lbl">施作日期</td><td class="val"><input type="text" placeholder="實際施作日期"></td>
-    </tr></table>
-    <div class="section-bar">▌ 請款對象</div>
-    <table class="info-table">
-      <tr><td class="lbl">公司名稱</td><td class="val"><input type="text" placeholder="公司名稱或姓名"></td><td class="lbl">聯　絡　人</td><td class="val"><input type="text" placeholder="姓名"></td></tr>
-      <tr><td class="lbl">聯絡電話</td><td class="val"><input type="text" placeholder="電話號碼"></td><td class="lbl">施作地點</td><td class="val"><input type="text" placeholder="完整施作地址"></td></tr>
-    </table>
-    <div class="section-bar">▌ 請款明細</div>
-    <table class="items-table"><thead><tr>
-      <th style="width:40px;">項次</th><th>施作項目名稱</th><th style="width:60px;">數量</th>
-      <th style="width:100px;">單價（元）</th><th style="width:100px;">小計（元）</th><th style="width:140px;">備　　註</th><th style="width:36px;"></th>
-    </tr></thead><tbody id="tbody-inv-${qno}"></tbody></table>
-    <button class="add-row-btn" onclick="addRow(this.previousElementSibling.querySelector('tbody'))">＋ 新增項目</button>
-    <div class="total-section"><table class="total-table">
-      <tr><td class="total-label">小　　計</td><td class="total-value"><span class="subtotal-val"></span></td></tr>
-      <tr class="tax-row"><td class="total-label" style="position:relative;">營業稅（5%）<button class="tax-toggle" onclick="toggleTax(this.closest('.quote-wrap'))" title="開關稅金">✕</button></td><td class="total-value"><span class="tax-val"></span></td></tr>
-      <tr><td class="total-grand"><span class="total-label-text">含稅總計</span></td><td class="total-grand-value"><span class="total-val"></span></td></tr>
-    </table></div>
-    <div class="daxie"><span class="daxie-text">總計大寫：新台幣　　　　　　　元整</span></div>
-    <div class="bottom-section">
-      <div class="bottom-left"><div class="bottom-title">▌ 付款說明</div>
-        1. 請於收到請款單後 30 天內完成付款。<br>
-        2. 付款方式：匯款或現金均可。<br>
-        3. 匯款後請通知本公司並提供匯款資訊。<br>
-        4. 如有疑問請聯繫：董厚謙<br>
-        　 電話：0908-003-398　Email：hawaii365days@gmail.com
-      </div>
-      <div class="bottom-right"><div class="bottom-title">▌ 匯款資訊</div>
-        銀行名稱：玉山銀行（808）屏東分行<br>
-        戶　　名：夏威夷實業社 董厚謙<br>
-        帳　　號：0934-940-181885<br>
-        統一編號：88762480
-      </div>
-    </div>
-    <div class="sign-section">
-      <div class="sign-box"><div class="sign-title">▌ 客戶確認收款</div>
-        <div style="font-size:11px;color:#666;margin-bottom:6px;">本人（公司）確認已收到上述請款單並同意付款</div>
-        <div class="sign-line"><span>簽名 / 蓋章：</span><input type="text"></div>
-        <div class="sign-line"><span>付款日期：</span><input type="text"></div>
-      </div>
-      <div class="sign-box"><div class="sign-title">▌ 廠商用印</div>
-        <div style="font-size:11px;color:#666;margin-bottom:4px;">${isPest ? '夏威夷除蟲達人　夏威夷實業社' : '夏威夷實業社'}</div>
-        <div style="font-size:11px;color:#666;margin-bottom:4px;">地址：屏東市瑞華街 129 號</div>
-        ${isPest ? '<div style="font-size:11px;color:#666;margin-bottom:4px;">執照：環藥病媒字第 13-042 號</div>' : ''}
-        <div class="sign-line"><span>負責人：</span><input type="text" placeholder="董厚謙"></div>
-        <div class="sign-line"><span>日期：</span><input type="text"></div>
-      </div>
-    </div>
-    <div class="quote-footer">夏威夷實業社｜屏東市瑞華街129號｜0908-959-655｜統編：88762480</div>
-    <div class="form-actions">
-      <button class="form-btn form-btn-del" onclick="this.closest('.quote-wrap').remove()">🗑️ 刪除</button>
-      <button class="form-btn form-btn-save" onclick="saveInvoiceToSheets(this.closest('.quote-wrap'), '${qno}', '${type}')">💾 儲存到試算表</button>
-      <button class="form-btn form-btn-pdf" onclick="saveAsPDF(this.closest('.quote-wrap'), '${qno}')">📄 存檔PDF</button>
-    </div>`;
+  wrap.innerHTML =
+    '<div class="quote-header">' +
+      '<div class="quote-header-left">' +
+        '<div class="company">' + (isPest ? '夏威夷除蟲達人' : '夏威夷實業社') + '</div>' +
+        '<div class="license">' + (isPest ? '執照：環藥病媒字第 13-042 號' : '專業清潔・值得信賴') + '</div>' +
+      '</div>' +
+      '<div class="quote-header-center">' + (isPest ? '病媒防治' : '清潔服務') + '請款單</div>' +
+      '<div class="quote-header-right"><div class="qno-label">請款單號</div><div class="qno">' + qno + '</div></div>' +
+    '</div>' +
+    '<table class="info-table"><tr>' +
+      '<td class="lbl">請款單號</td><td class="val"><input type="text" value="' + qno + '"></td>' +
+      '<td class="lbl">請款日期</td><td class="val"><input type="text" value="' + today + '"></td>' +
+    '</tr><tr>' +
+      '<td class="lbl">對應報價單</td><td class="val"><input type="text" placeholder="對應報價單號（選填）"></td>' +
+      '<td class="lbl">施作日期</td><td class="val"><input type="text" placeholder="實際施作日期"></td>' +
+    '</tr></table>' +
+    '<div class="section-bar">▌ 請款對象</div>' +
+    '<table class="info-table">' +
+      '<tr><td class="lbl">公司名稱</td><td class="val"><input type="text" placeholder="公司名稱或姓名"></td><td class="lbl">聯　絡　人</td><td class="val"><input type="text" placeholder="姓名"></td></tr>' +
+      '<tr><td class="lbl">聯絡電話</td><td class="val"><input type="text" placeholder="電話號碼"></td><td class="lbl">施作地點</td><td class="val"><input type="text" placeholder="完整施作地址"></td></tr>' +
+    '</table>' +
+    '<div class="section-bar">▌ 請款明細</div>' +
+    '<table class="items-table"><thead><tr>' +
+      '<th style="width:40px;">項次</th><th>施作項目名稱</th><th style="width:60px;">數量</th>' +
+      '<th style="width:100px;">單價（元）</th><th style="width:100px;">小計（元）</th><th style="width:140px;">備　　註</th><th style="width:36px;"></th>' +
+    '</tr></thead><tbody id="tbody-inv-' + qno + '"></tbody></table>' +
+    '<button class="add-row-btn" onclick="addRow(this.previousElementSibling.querySelector(\'tbody\'))">＋ 新增項目</button>' +
+    '<div class="total-section"><table class="total-table">' +
+      '<tr><td class="total-label">小　　計</td><td class="total-value"><span class="subtotal-val"></span></td></tr>' +
+      '<tr class="tax-row"><td class="total-label" style="position:relative;">營業稅（5%）<button class="tax-toggle" onclick="toggleTax(this.closest('.quote-wrap'))" title="開關稅金">✕</button></td><td class="total-value"><span class="tax-val"></span></td></tr>' +
+      '<tr><td class="total-grand"><span class="total-label-text">含稅總計</span></td><td class="total-grand-value"><span class="total-val"></span></td></tr>' +
+    '</table></div>' +
+    '<div class="daxie"><span class="daxie-text">總計大寫：新台幣　　　　　　　元整</span></div>' +
+    '<div class="bottom-section">' +
+      '<div class="bottom-left"><div class="bottom-title">▌ 付款說明</div>' +
+        '1. 請於收到請款單後 30 天內完成付款。<br>' +
+        '2. 付款方式：匯款或現金均可。<br>' +
+        '3. 匯款後請通知本公司並提供匯款資訊。<br>' +
+        '4. 如有疑問請聯繫：董厚謙<br>' +
+        '　 電話：0908-003-398　Email：hawaii365days@gmail.com' +
+      '</div>' +
+      '<div class="bottom-right"><div class="bottom-title">▌ 匯款資訊</div>' +
+        '銀行名稱：玉山銀行（808）屏東分行<br>' +
+        '戶　　名：夏威夷實業社 董厚謙<br>' +
+        '帳　　號：0934-940-181885<br>' +
+        '統一編號：88762480' +
+      '</div>' +
+    '</div>' +
+    '<div class="sign-section">' +
+      '<div class="sign-box"><div class="sign-title">▌ 客戶確認收款</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:6px;">本人（公司）確認已收到上述請款單並同意付款</div>' +
+        '<div class="sign-line"><span>簽名 / 蓋章：</span><input type="text"></div>' +
+        '<div class="sign-line"><span>付款日期：</span><input type="text"></div>' +
+      '</div>' +
+      '<div class="sign-box"><div class="sign-title">▌ 廠商用印</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:4px;">' + (isPest ? '夏威夷除蟲達人　夏威夷實業社' : '夏威夷實業社') + '</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:4px;">地址：屏東市瑞華街 129 號</div>' +
+        (isPest ? '<div style="font-size:11px;color:#666;margin-bottom:4px;">執照：環藥病媒字第 13-042 號</div>' : '') +
+        '<div class="seal-wrap">' +
+        '<img class="seal-img" src="https://wallacemate.github.io/hawaii-tools/%E5%85%AC%E5%8F%B8%E5%A4%A7%E7%AB%A0_0.jpg">' +
+        '<img class="seal-img" src="https://wallacemate.github.io/hawaii-tools/%E5%85%AC%E5%8F%B8%E5%B0%8F%E7%AB%A0_0.jpg">' +
+        '</div>' +
+        '<div class="sign-line"><span>日期：</span><input type="text"></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="quote-footer">夏威夷實業社｜屏東市瑞華街129號｜0908-959-655｜統編：88762480</div>' +
+    '<div class="form-actions">' +
+      '<button class="form-btn form-btn-del" onclick="this.closest(\'.quote-wrap\').remove()">🗑️ 刪除</button>' +
+      '<button class="form-btn form-btn-save" onclick="saveInvoiceToSheets(this.closest(\'.quote-wrap\'), \'' + qno + '\', \'' + type + \')">💾 儲存到試算表</button>' +
+      '<button class="form-btn form-btn-pdf" onclick="saveAsPDF(this.closest(\'.quote-wrap\'), \'' + qno + \')">📄 存檔PDF</button>' +
+    '</div>';
 
   document.getElementById('quotes-container').appendChild(wrap);
   var tbody = wrap.querySelector('tbody');
