@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏威夷實業社｜薪資計算系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-light: #243460;
+  --gold: #C9A84C;
+  --gold-light: #e8c96a;
+  --cream: #f8f4ee;
+  --border: rgba(201,168,76,0.2);
+  --green: #27AE60;
+  --red: #e74c3c;
+  --orange: #E67E22;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--navy);
+  min-height: 100vh;
+  color: var(--cream);
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.header-badge { font-size: 11px; letter-spacing: 3px; color: var(--gold); display: block; margin-bottom: 8px; }
+.header h1 { font-family: 'Noto Serif TC', serif; font-size: 26px; font-weight: 900; color: white; letter-spacing: 2px; }
+
+/* 分頁切換 */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.tab-btn {
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  transition: all 0.2s;
+}
+.tab-btn.active {
+  background: var(--gold);
+  color: var(--navy);
+  border-color: var(--gold);
+  font-weight: 700;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* 卡片 */
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* 月份選擇列 */
+.month-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.month-bar label { font-size: 13px; color: rgba(255,255,255,0.5); }
+.form-select, .form-input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: white;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  outline: none;
+}
+.form-select option { background: #1a2744; }
+.form-input { width: 80px; }
+
+/* 員工出勤表格 */
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.attendance-table th {
+  background: rgba(201,168,76,0.1);
+  color: var(--gold);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.attendance-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+.attendance-table tr:last-child td { border-bottom: none; }
+.attendance-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* 出勤輸入 */
+.att-input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: white;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  width: 60px;
+  text-align: center;
+  outline: none;
+}
+.att-input:focus { border-color: var(--gold); }
+.att-note {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  margin-top: 2px;
+}
+
+/* 薪資結果 */
+.salary-amount {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.salary-breakdown {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 3px;
+}
+
+/* 按鈕 */
+.btn {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Noto Sans TC', sans-serif;
+  transition: all 0.2s;
+}
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-light); }
+.btn-green { background: var(--green); color: white; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: rgba(255,255,255,0.6); }
+
+/* 薪資單預覽 Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #333;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
+  background: #f9f9f9;
+}
+
+/* 薪資單樣式 */
+.payslip {
+  padding: 28px;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.payslip-header {
+  background: #1a2744;
+  color: white;
+  padding: 16px 20px;
+  margin: -28px -28px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.payslip-company { font-size: 16px; font-weight: 700; }
+.payslip-title { font-size: 18px; font-weight: 900; letter-spacing: 4px; }
+.payslip-month { font-size: 12px; color: #C9A84C; }
+.payslip-employee {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f4ee;
+  border-radius: 8px;
+}
+.payslip-field { font-size: 12px; }
+.payslip-field span { color: #666; margin-right: 4px; }
+.payslip-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+.payslip-table th {
+  background: #1a2744;
+  color: white;
+  padding: 8px 12px;
+  font-size: 12px;
+  text-align: left;
+}
+.payslip-table td {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid #eee;
+}
+.payslip-table tr:last-child td { border-bottom: none; }
+.payslip-total {
+  background: #1a2744;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.payslip-total-label { font-size: 14px; font-weight: 700; }
+.payslip-total-amount { font-size: 22px; font-weight: 900; color: #C9A84C; }
+.payslip-sign {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+.payslip-sign-box {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+  min-height: 60px;
+}
+.payslip-sign-label { font-size: 11px; color: #666; margin-bottom: 8px; }
+.payslip-footer {
+  text-align: center;
+  font-size: 10px;
+  color: #999;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--green);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: none;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* 月薪頁面 */
+.monthly-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.monthly-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.monthly-name {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+}
+.monthly-salary {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold);
+  margin: 12px 0;
+}
+.leave-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.leave-input-wrap label { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+@media print {
+  body { background: white; }
+  .modal { max-height: none; box-shadow: none; }
+  .modal-actions { display: none; }
+}
+@media (max-width: 600px) {
+  .monthly-grid { grid-template-columns: 1fr; }
+  .attendance-table th:nth-child(5),
+  .attendance-table td:nth-child(5) { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <span class="header-badge">Hawaii Industrial</span>
+    <h1>薪資計算系統</h1>
+  </div>
+
+  <!-- 分頁 -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('daily')">日薪人員</button>
+    <button class="tab-btn" onclick="switchTab('monthly')">月薪人員</button>
+  </div>
+
+  <!-- ===== 日薪人員 ===== -->
+  <div id="tab-daily" class="tab-content active">
+
+    <div class="month-bar">
+      <label>計薪月份</label>
+      <select class="form-select" id="payMonth" onchange="updateCalc()">
+      </select>
+      <button class="btn btn-gold" onclick="calcAll()">🧮 計算所有人薪資</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">出勤紀錄輸入</div>
+      <table class="attendance-table">
+        <thead>
+          <tr>
+            <th>姓名</th>
+            <th>全天出勤</th>
+            <th>半天出勤</th>
+            <th>加班時數</th>
+            <th>備註</th>
+            <th>本月薪資</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="attendanceBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ===== 月薪人員 ===== -->
+  <div id="tab-monthly" class="tab-content">
+
+    <div class="month-bar">
+      <label>計薪月份</label>
+      <select class="form-select" id="payMonthM" onchange="updateMonthly()">
+      </select>
+    </div>
+
+    <div class="monthly-grid" id="monthlyGrid"></div>
+
+  </div>
+
+</div>
+
+<!-- 薪資單 Modal -->
+<div class="modal-overlay" id="payslipModal">
+  <div class="modal">
+    <div class="payslip" id="payslipContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">關閉</button>
+      <button class="btn btn-gold" onclick="printPayslip()">🖨️ 列印薪資單</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 員工資料 =====
+const EMPLOYEES = [
+  { id: 'fan',   name: '范氏明', daily: 1800, extra: 1000, note: '含油資加給' },
+  { id: 'tang1', name: '唐晢語', daily: 2000, extra: 0,    note: '' },
+  { id: 'chen1', name: '陳韋盛', daily: 1800, extra: 0,    note: '週領現' },
+  { id: 'hu',    name: '胡婷芬', daily: 1700, extra: 1500, note: '含管理加給' },
+  { id: 'lin',   name: '林春岑', daily: 1700, extra: 0,    note: '' },
+  { id: 'huang1',name: '黃于哲', daily: 1700, extra: 0,    note: '' },
+  { id: 'huang2',name: '黃詩峰', daily: 1700, extra: 0,    note: '' },
+  { id: 'tang2', name: '唐懷斌', daily: 1800, extra: 0,    note: '' },
+];
+
+const MONTHLY_EMPLOYEES = [
+  { id: 'xu',   name: '許文銀', base: 30000, insurance: 2895 },
+  { id: 'chen2',name: '陳麗紅', base: 30000, insurance: 2895 },
+];
+
+// 半日薪公式：(日薪 - 100) / 2 + 100
+function calcHalfDay(daily) {
+  return Math.round((daily - 100) / 2 + 100);
+}
+
+// 加班費計算（超過30分鐘進位）
+function calcOT(hours) {
+  return Math.round(hours) * 200;
+}
+
+// 計算單人薪資
+function calcSalary(emp, fullDays, halfDays, otHours) {
+  var half = calcHalfDay(emp.daily);
+  var base = (fullDays * emp.daily) + (halfDays * half);
+  var ot = calcOT(otHours);
+  var total = base + ot + emp.extra;
+  return { base, ot, extra: emp.extra, total, half };
+}
+
+// ===== 月份選單初始化 =====
+function initMonthSelect() {
+  var now = new Date();
+  var selects = ['payMonth', 'payMonthM'];
+  selects.forEach(function(id) {
+    var sel = document.getElementById(id);
+    sel.innerHTML = '';
+    for (var i = 0; i < 6; i++) {
+      var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1).padStart(2, '0');
+      var rocY = y - 1911;
+      var opt = document.createElement('option');
+      opt.value = y + '-' + m;
+      opt.textContent = '民國' + rocY + '年' + parseInt(m) + '月';
+      sel.appendChild(opt);
+    }
+  });
+}
+
+// ===== 日薪人員表格 =====
+function renderAttendance() {
+  var tbody = document.getElementById('attendanceBody');
+  tbody.innerHTML = EMPLOYEES.map(function(emp) {
+    var half = calcHalfDay(emp.daily);
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:500;color:white;">${emp.name}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);">日薪 ${emp.daily.toLocaleString()}｜半日 ${half.toLocaleString()}</div>
+          ${emp.note ? '<div style="font-size:11px;color:var(--gold);">+' + emp.extra.toLocaleString() + ' ' + emp.note + '</div>' : ''}
+        </td>
+        <td>
+          <input class="att-input" id="full_${emp.id}" type="number" min="0" value="0" oninput="calcOne('${emp.id}')">
+          <div class="att-note">天</div>
+        </td>
+        <td>
+          <input class="att-input" id="half_${emp.id}" type="number" min="0" value="0" oninput="calcOne('${emp.id}')">
+          <div class="att-note">天</div>
+        </td>
+        <td>
+          <input class="att-input" id="ot_${emp.id}" type="number" min="0" step="0.5" value="0" oninput="calcOne('${emp.id}')">
+          <div class="att-note">小時</div>
+        </td>
+        <td>
+          <input class="att-input" style="width:100px;" id="note_${emp.id}" type="text" placeholder="備註">
+        </td>
+        <td>
+          <div class="salary-amount" id="salary_${emp.id}">$0</div>
+          <div class="salary-breakdown" id="breakdown_${emp.id}"></div>
+        </td>
+        <td>
+          <button class="btn btn-gold" style="padding:6px 12px;font-size:12px;" onclick="showPayslip('${emp.id}')">薪資單</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function calcOne(empId) {
+  var emp = EMPLOYEES.find(function(e) { return e.id === empId; });
+  var full = parseFloat(document.getElementById('full_' + empId).value) || 0;
+  var half = parseFloat(document.getElementById('half_' + empId).value) || 0;
+  var ot   = parseFloat(document.getElementById('ot_' + empId).value) || 0;
+  var result = calcSalary(emp, full, half, ot);
+  document.getElementById('salary_' + empId).textContent = '$' + result.total.toLocaleString();
+  var parts = [];
+  if (full > 0) parts.push('全天×' + full + '=' + (full * emp.daily).toLocaleString());
+  if (half > 0) parts.push('半天×' + half + '=' + (half * result.half).toLocaleString());
+  if (ot > 0)   parts.push('加班=' + result.ot.toLocaleString());
+  if (emp.extra > 0) parts.push('加給=' + emp.extra.toLocaleString());
+  document.getElementById('breakdown_' + empId).textContent = parts.join('　');
+}
+
+function calcAll() {
+  EMPLOYEES.forEach(function(emp) { calcOne(emp.id); });
+  showToast('✅ 所有人薪資計算完成');
+}
+
+function updateCalc() { /* 月份切換時清空或保留，目前保留 */ }
+
+// ===== 薪資單 =====
+function showPayslip(empId) {
+  var emp = EMPLOYEES.find(function(e) { return e.id === empId; });
+  var full = parseFloat(document.getElementById('full_' + empId).value) || 0;
+  var half = parseFloat(document.getElementById('half_' + empId).value) || 0;
+  var ot   = parseFloat(document.getElementById('ot_' + empId).value) || 0;
+  var note = document.getElementById('note_' + empId).value || '';
+  var result = calcSalary(emp, full, half, ot);
+  var month = document.getElementById('payMonth').value;
+  var monthParts = month.split('-');
+  var rocY = parseInt(monthParts[0]) - 1911;
+  var monthStr = '民國' + rocY + '年' + parseInt(monthParts[1]) + '月';
+
+  // 計算發薪日
+  var payDay = getPayDay(parseInt(monthParts[0]), parseInt(monthParts[1]));
+
+  var rows = [];
+  if (full > 0) rows.push('<tr><td>全天出勤（' + full + '天 × ' + emp.daily.toLocaleString() + '）</td><td style="text-align:right;">$' + (full * emp.daily).toLocaleString() + '</td></tr>');
+  if (half > 0) rows.push('<tr><td>半天出勤（' + half + '天 × ' + result.half.toLocaleString() + '）</td><td style="text-align:right;">$' + (half * result.half).toLocaleString() + '</td></tr>');
+  if (ot > 0)   rows.push('<tr><td>加班費（' + ot + '小時 × 200）</td><td style="text-align:right;">$' + result.ot.toLocaleString() + '</td></tr>');
+  if (emp.extra > 0) rows.push('<tr><td>' + emp.note + '（每月固定）</td><td style="text-align:right;">$' + emp.extra.toLocaleString() + '</td></tr>');
+
+  document.getElementById('payslipContent').innerHTML = `
+    <div class="payslip-header">
+      <div>
+        <div class="payslip-company">夏威夷實業社</div>
+        <div style="font-size:11px;color:#C9A84C;">環藥病媒字第 13-042 號</div>
+      </div>
+      <div class="payslip-title">薪資單</div>
+      <div class="payslip-month">${monthStr}</div>
+    </div>
+    <div class="payslip-employee">
+      <div class="payslip-field"><span>員工姓名</span>${emp.name}</div>
+      <div class="payslip-field"><span>薪資月份</span>${monthStr}</div>
+      <div class="payslip-field"><span>出勤天數</span>${full + half * 0.5} 天</div>
+      <div class="payslip-field"><span>發薪日期</span>${payDay}</div>
+    </div>
+    <table class="payslip-table">
+      <thead><tr><th>項目</th><th style="text-align:right;">金額</th></tr></thead>
+      <tbody>${rows.join('')}</tbody>
+    </table>
+    <div class="payslip-total">
+      <div class="payslip-total-label">本月實領金額</div>
+      <div class="payslip-total-amount">NT$ ${result.total.toLocaleString()}</div>
+    </div>
+    ${note ? '<div style="font-size:12px;color:#666;margin-bottom:12px;">備註：' + note + '</div>' : ''}
+    <div style="background:#f8f4ee;border-radius:8px;padding:12px 16px;font-size:12px;color:#444;margin-top:12px;">
+      <div style="font-weight:700;color:#1a2744;margin-bottom:6px;">人事聯絡資訊</div>
+      <div>HR 負責人：董厚謙</div>
+      <div>聯絡電話：0908-003-398</div>
+      <div>公司地址：屏東市瑞華街 129 號</div>
+    </div>
+    <div class="payslip-footer">夏威夷實業社｜屏東市瑞華街129號｜0908-959-655｜統編：88762480</div>
+  `;
+  document.getElementById('payslipModal').classList.add('open');
+}
+
+// 計算發薪日（每月5號，遇假日提前）
+function getPayDay(year, month) {
+  var d = new Date(year, month - 1, 5);
+  var day = d.getDay();
+  var payDate = 5;
+  if (day === 0) payDate = 3; // 週日 → 週五（3日）
+  if (day === 6) payDate = 4; // 週六 → 週五（4日）
+  var rocY = year - 1911;
+  return '民國' + rocY + '年' + month + '月' + payDate + '日';
+}
+
+function closeModal() {
+  document.getElementById('payslipModal').classList.remove('open');
+}
+
+function printPayslip() {
+  var content = document.getElementById('payslipContent').innerHTML;
+  var win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+      body { font-family: 'Noto Sans TC', sans-serif; margin: 0; padding: 20px; }
+      .payslip-header { background: #1a2744; color: white; padding: 16px 20px; margin: -20px -20px 20px; display: flex; justify-content: space-between; align-items: center; }
+      .payslip-company { font-size: 16px; font-weight: 700; }
+      .payslip-title { font-size: 18px; font-weight: 900; letter-spacing: 4px; }
+      .payslip-month { font-size: 12px; color: #C9A84C; }
+      .payslip-employee { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; padding: 12px; background: #f8f4ee; border-radius: 8px; }
+      .payslip-field { font-size: 12px; }
+      .payslip-field span { color: #666; margin-right: 4px; }
+      .payslip-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+      .payslip-table th { background: #1a2744; color: white; padding: 8px 12px; font-size: 12px; text-align: left; }
+      .payslip-table td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #eee; }
+      .payslip-total { background: #1a2744; color: white; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+      .payslip-total-label { font-size: 14px; font-weight: 700; }
+      .payslip-total-amount { font-size: 22px; font-weight: 900; color: #C9A84C; }
+      .hr-info { background: #f8f4ee; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #444; margin-top: 12px; }
+      .payslip-footer { text-align: center; font-size: 10px; color: #999; margin-top: 16px; padding-top: 12px; border-top: 1px solid #eee; }
+      @page { size: A5; margin: 10mm; }
+    </style></head><body>${content}
+    <script>window.onload=function(){window.print();setTimeout(function(){window.close();},2000);}<\/script>
+    </body></html>`);
+  win.document.close();
+}
+
+// ===== 月薪人員 =====
+function renderMonthly() {
+  var grid = document.getElementById('monthlyGrid');
+  grid.innerHTML = MONTHLY_EMPLOYEES.map(function(emp) {
+    var total = emp.base + emp.insurance;
+    return `
+      <div class="monthly-card">
+        <div class="monthly-name">${emp.name}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);">駐點清潔人員</div>
+        <div class="monthly-salary">NT$ ${total.toLocaleString()}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:12px;">
+          本薪 ${emp.base.toLocaleString()} ＋ 勞健保補貼 ${emp.insurance.toLocaleString()}
+        </div>
+        <div class="leave-input-wrap">
+          <label>本月年假</label>
+          <input class="att-input" id="leave_${emp.id}" type="number" min="0" value="0" style="width:50px;">
+          <label>天</label>
+        </div>
+        <div style="margin-top:12px;">
+          <button class="btn btn-gold" style="width:100%;font-size:13px;" onclick="showMonthlyPayslip('${emp.id}')">產出薪資單</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showMonthlyPayslip(empId) {
+  var emp = MONTHLY_EMPLOYEES.find(function(e) { return e.id === empId; });
+  var leave = parseInt(document.getElementById('leave_' + empId).value) || 0;
+  var total = emp.base + emp.insurance;
+  var month = document.getElementById('payMonthM').value;
+  var monthParts = month.split('-');
+  var rocY = parseInt(monthParts[0]) - 1911;
+  var monthStr = '民國' + rocY + '年' + parseInt(monthParts[1]) + '月';
+  var payDay = getPayDay(parseInt(monthParts[0]), parseInt(monthParts[1]));
+
+  document.getElementById('payslipContent').innerHTML = `
+    <div class="payslip-header">
+      <div>
+        <div class="payslip-company">夏威夷實業社</div>
+        <div style="font-size:11px;color:#C9A84C;">環藥病媒字第 13-042 號</div>
+      </div>
+      <div class="payslip-title">薪資單</div>
+      <div class="payslip-month">${monthStr}</div>
+    </div>
+    <div class="payslip-employee">
+      <div class="payslip-field"><span>員工姓名</span>${emp.name}</div>
+      <div class="payslip-field"><span>薪資月份</span>${monthStr}</div>
+      <div class="payslip-field"><span>薪資類型</span>月薪</div>
+      <div class="payslip-field"><span>發薪日期</span>${payDay}</div>
+    </div>
+    <table class="payslip-table">
+      <thead><tr><th>項目</th><th style="text-align:right;">金額</th></tr></thead>
+      <tbody>
+        <tr><td>本薪</td><td style="text-align:right;">$${emp.base.toLocaleString()}</td></tr>
+        <tr><td>勞健保補貼</td><td style="text-align:right;">$${emp.insurance.toLocaleString()}</td></tr>
+        ${leave > 0 ? '<tr><td>本月年假（' + leave + '天）</td><td style="text-align:right;">— 已使用</td></tr>' : ''}
+      </tbody>
+    </table>
+    <div class="payslip-total">
+      <div class="payslip-total-label">本月實領金額</div>
+      <div class="payslip-total-amount">NT$ ${total.toLocaleString()}</div>
+    </div>
+    <div style="background:#f8f4ee;border-radius:8px;padding:12px 16px;font-size:12px;color:#444;margin-top:12px;">
+      <div style="font-weight:700;color:#1a2744;margin-bottom:6px;">人事聯絡資訊</div>
+      <div>HR 負責人：董厚謙</div>
+      <div>聯絡電話：0908-003-398</div>
+      <div>公司地址：屏東市瑞華街 129 號</div>
+    </div>
+    <div class="payslip-footer">夏威夷實業社｜屏東市瑞華街129號｜0908-959-655｜統編：88762480</div>
+  `;
+  document.getElementById('payslipModal').classList.add('open');
+}
+
+function updateMonthly() { /* 月份切換 */ }
+
+// ===== 分頁切換 =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 3000);
+}
+
+// ===== 初始化 =====
+document.getElementById('payslipModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+initMonthSelect();
+renderAttendance();
+renderMonthly();
+</script>
+</body>
+</html>
