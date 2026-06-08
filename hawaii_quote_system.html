@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏威夷實業社 報價單系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --gold: #C9A84C;
+  --cream: #f8f4ee;
+  --border: #ddd;
+  --light: #F0F4F8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: #f0f0f0;
+  padding: 20px;
+}
+.top-bar {
+  max-width: 900px;
+  margin: 0 auto 15px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.top-bar h2 {
+  flex: 1;
+  font-size: 16px;
+  color: var(--navy);
+  font-weight: 700;
+}
+.btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.btn-clean { background: #2E75B6; color: white; }
+.btn-pest { background: var(--navy); color: white; }
+.btn-save { background: #27AE60; color: white; }
+.btn-pdf { background: var(--gold); color: var(--navy); }
+
+.quote-wrap {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto 30px;
+  background: white;
+  border: 2px solid var(--navy);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.quote-header {
+  background: var(--navy);
+  color: white;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.quote-header-left .company { font-size: 18px; font-weight: 700; }
+.quote-header-left .license { font-size: 11px; color: var(--gold); margin-top: 3px; }
+.quote-header-center { font-size: 22px; font-weight: 700; letter-spacing: 4px; }
+.quote-header-right { text-align: right; }
+.quote-header-right .qno { font-size: 13px; color: var(--gold); font-weight: 700; }
+.quote-header-right .qno-label { font-size: 10px; color: #aaa; }
+
+.section-bar {
+  background: #2E75B6;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 12px;
+}
+
+table.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+table.info-table td { border: 1px solid #ccc; padding: 0; }
+.lbl {
+  background: var(--light);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--navy);
+  padding: 6px 10px;
+  text-align: center;
+  white-space: nowrap;
+  width: 90px;
+}
+.val { padding: 3px 8px; }
+input[type="text"], input[type="date"], textarea, select {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 3px 4px;
+  background: transparent;
+  color: #333;
+  min-width: 0;
+}
+textarea { resize: none; display: block; }
+
+table.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+table.items-table th {
+  background: var(--navy);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 8px;
+  text-align: center;
+  border: 1px solid #333;
+}
+table.items-table td {
+  border: 1px solid #ccc;
+  padding: 2px 6px;
+  font-size: 13px;
+  vertical-align: middle;
+}
+.add-row-btn {
+  width: 100%;
+  padding: 7px;
+  background: #E6F1FB;
+  border: 1px dashed #2E75B6;
+  border-top: none;
+  color: #2E75B6;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+}
+.del-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #cc0000;
+  font-size: 16px;
+  padding: 2px 4px;
+}
+
+.total-section { display: flex; justify-content: flex-end; border-top: 2px solid var(--navy); }
+.total-table { width: 320px; border-collapse: collapse; }
+.total-table td { border: 1px solid #ccc; padding: 5px 10px; font-size: 13px; }
+.total-label { background: var(--light); font-weight: 700; color: var(--navy); text-align: center; width: 120px; }
+.total-value { text-align: right; }
+.total-grand { background: var(--navy); color: white; font-weight: 700; font-size: 14px; text-align: center; }
+.total-grand-value { background: var(--gold); color: var(--navy); font-weight: 700; font-size: 14px; text-align: right; }
+
+.tax-toggle {
+  background: #cc0000;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 1px 4px;
+  margin-left: 4px;
+}
+
+.daxie {
+  background: var(--light);
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--navy);
+  font-weight: 700;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.bottom-section { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #ccc; }
+.bottom-left, .bottom-right { padding: 10px 12px; font-size: 12px; color: #444; line-height: 1.8; }
+.bottom-left { border-right: 1px solid #ccc; }
+.bottom-title { font-weight: 700; color: var(--navy); margin-bottom: 4px; font-size: 13px; }
+
+.sign-section { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #ccc; }
+.sign-box { padding: 8px 12px; min-height: 90px; }
+.sign-box:first-child { border-right: 1px solid #ccc; }
+.sign-title { font-size: 12px; font-weight: 700; color: var(--navy); background: var(--light); text-align: center; padding: 4px; margin: -8px -12px 8px; border-bottom: 1px solid #ccc; }
+.sign-line { margin-top: 8px; border-bottom: 1px solid #bbb; font-size: 12px; color: #777; padding-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+.sign-line input { flex: 1; border: none; outline: none; font-size: 12px; background: transparent; }
+
+.quote-footer { text-align: center; font-size: 10px; color: #999; padding: 6px; border-top: 1px solid #eee; }
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  gap: 8px;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+  flex-wrap: wrap;
+}
+.form-btn { padding: 5px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; }
+.form-btn-save { background: #27AE60; color: white; }
+.form-btn-pdf { background: var(--gold); color: var(--navy); }
+.form-btn-del { background: #eee; color: #888; }
+
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #27AE60;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  display: none;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  max-width: 340px;
+}
+
+@media print {
+  body { background: white; padding: 0; }
+  .top-bar, .form-actions, .add-row-btn, .del-btn { display: none; }
+  .quote-wrap { margin: 0; max-width: 100%; border: 2px solid var(--navy); }
+  @page { size: A4 portrait; margin: 10mm; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h2>🧾 夏威夷實業社 報價單／請款單系統</h2>
+  <button class="btn btn-clean" onclick="createQuote('clean')">＋ 清潔報價單</button>
+  <button class="btn btn-pest" onclick="createQuote('pest')">＋ 防治報價單</button>
+  <button class="btn" style="background:#8E44AD;color:white;" onclick="createInvoice('clean')">＋ 清潔請款單</button>
+  <button class="btn" style="background:#2C3E50;color:white;" onclick="createInvoice('pest')">＋ 防治請款單</button>
+  <button class="btn btn-pdf" onclick="window.print()">🖨️ 列印全部</button>
+</div>
+
+<div id="quotes-container"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 請填入你的 Google Apps Script 網址 =====
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuJ9v5KvA_NI8iFfkgXmZ8sGooJtSMEF9F2F2QlPdxxgkW8xZxhM-lN3g37Jb4NiJV9g/exec';
+// ===============================================
+
+var quoteCounter = { clean: 0, pest: 0 };
+var dailyCounter = {};
+
+function getTodayKey() {
+  var d = new Date();
+  var y = d.getFullYear() - 1911;
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return y + '-' + m + '-' + day;
+}
+
+function showToast(msg, color) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || '#27AE60';
+  t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 4000);
+}
+
+function getToday() {
+  var d = new Date();
+  var roc = d.getFullYear() - 1911;
+  return roc + '年' + pad(d.getMonth()+1) + '月' + pad(d.getDate()) + '日';
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function generateNo(type) {
+  var todayKey = getTodayKey();
+  var prefix = type === 'clean' ? '清潔' : '防治';
+  var counterKey = prefix + '-' + todayKey;
+  
+  if (!dailyCounter[counterKey]) {
+    dailyCounter[counterKey] = 0;
+  }
+  dailyCounter[counterKey]++;
+  
+  return prefix + '-' + todayKey + '-' + String(dailyCounter[counterKey]).padStart(2,'0');
+}
+
+function calcRow(row) {
+  var qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+  var price = parseFloat(row.querySelector('.price-input').value.replace(/,/g,'')) || 0;
+  var sub = qty * price;
+  row.querySelector('.sub-display').textContent = sub > 0 ? sub.toLocaleString() : '';
+  calcTotal(row.closest('.quote-wrap'));
+}
+
+function calcTotal(wrap) {
+  var subtotal = 0;
+  wrap.querySelectorAll('.sub-display').forEach(function(el) {
+    subtotal += parseFloat(el.textContent.replace(/,/g,'')) || 0;
+  });
+  var taxRow = wrap.querySelector('.tax-row');
+  var hasTax = !taxRow.classList.contains('hidden');
+  var tax = hasTax ? Math.round(subtotal * 0.05) : 0;
+  var total = subtotal + tax;
+
+  wrap.querySelector('.subtotal-val').textContent = subtotal > 0 ? subtotal.toLocaleString() : '';
+  wrap.querySelector('.tax-val').textContent = tax > 0 ? tax.toLocaleString() : '';
+  wrap.querySelector('.total-val').textContent = total > 0 ? total.toLocaleString() : '';
+  wrap.querySelector('.daxie-text').textContent = total > 0 ? '總計大寫：新台幣 ' + numberToChinese(total) + ' 元整' : '總計大寫：新台幣　　　　　　　元整';
+}
+
+function toggleTax(wrap) {
+  var taxRow = wrap.querySelector('.tax-row');
+  var btn = wrap.querySelector('.tax-toggle');
+  var label = wrap.querySelector('.total-label-text');
+  if (taxRow.classList.contains('hidden')) {
+    taxRow.classList.remove('hidden');
+    btn.textContent = '✕';
+    btn.style.background = '#cc0000';
+    label.textContent = '含稅總計';
+  } else {
+    taxRow.classList.add('hidden');
+    btn.textContent = '＋';
+    btn.style.background = '#27AE60';
+    label.textContent = '未稅總計';
+  }
+  calcTotal(wrap);
+}
+
+function numberToChinese(num) {
+  var units = ['','拾','佰','仟','萬','拾萬','佰萬','仟萬'];
+  var digits = ['零','壹','貳','參','肆','伍','陸','柒','捌','玖'];
+  if (num === 0) return '零';
+  var result = '';
+  var str = String(num);
+  for (var i = 0; i < str.length; i++) {
+    var d = parseInt(str[i]);
+    var u = units[str.length - 1 - i];
+    if (d !== 0) result += digits[d] + u;
+    else if (result && !result.endsWith('零')) result += '零';
+  }
+  return result.replace(/零+$/, '');
+}
+
+function addRow(tbody) {
+  var rowNum = tbody.querySelectorAll('tr').length + 1;
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td style="text-align:center;width:40px;">' + rowNum + '</td>' +
+    '<td><input type="text" placeholder="施作項目說明"></td>' +
+    '<td><input type="text" class="qty-input" style="text-align:center;" placeholder="1" oninput="calcRow(this.closest(\'tr\'))"></td>' +
+    '<td><input type="text" class="price-input" style="text-align:right;" placeholder="0" oninput="calcRow(this.closest(\'tr\'))"></td>' +
+    '<td style="text-align:right;background:#fafafa;"><span class="sub-display"></span></td>' +
+    '<td><input type="text" placeholder="備註"></td>' +
+    '<td style="text-align:center;width:36px;"><button class="del-btn" onclick="this.closest(\'tr\').remove();calcTotal(this.closest(\'.quote-wrap\'))">✕</button></td>';
+  tbody.appendChild(tr);
+}
+
+// ===== 儲存到 Google 試算表 =====
+function saveToSheets(wrap, qno, type) {
+  var inputs = wrap.querySelectorAll('input[type="text"], input[type="date"]');
+  var data = {};
+
+  // 讀取基本資料
+  inputs.forEach(function(inp) {
+    var ph = inp.getAttribute('placeholder') || '';
+    var val = inp.value.trim();
+    if (ph.indexOf('公司名稱') !== -1 || ph.indexOf('姓名') !== -1 && ph.indexOf('負責') === -1) { data.client = data.client || val; }
+    if (ph.indexOf('聯絡人') !== -1) { data.contact = val; }
+    if (ph.indexOf('電話') !== -1) { data.phone = val; }
+    if (ph.indexOf('地點') !== -1) { data.address = val; }
+  });
+
+  // 讀取項目
+  var items = [];
+  wrap.querySelectorAll('table.items-table tbody tr').forEach(function(tr) {
+    var cols = tr.querySelectorAll('input');
+    if (cols[0] && cols[0].value) {
+      items.push({
+        name: cols[0].value,
+        qty: cols[1] ? cols[1].value : '',
+        price: cols[2] ? cols[2].value : '',
+        sub: tr.querySelector('.sub-display') ? tr.querySelector('.sub-display').textContent : '',
+        note: cols[3] ? cols[3].value : ''
+      });
+    }
+  });
+
+  var total = wrap.querySelector('.total-val').textContent;
+  var subtotal = wrap.querySelector('.subtotal-val').textContent;
+
+  var payload = {
+    action: 'saveQuote',
+    qno: qno,
+    type: type === 'clean' ? '清潔業務' : '病媒防治',
+    date: getToday(),
+    client: data.client || '',
+    contact: data.contact || '',
+    phone: data.phone || '',
+    address: data.address || '',
+    items: JSON.stringify(items),
+    subtotal: subtotal,
+    total: total,
+    timestamp: new Date().toISOString()
+  };
+
+  showToast('⏳ 儲存中...', '#2E75B6');
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success) {
+      showToast('✅ 報價單 ' + qno + ' 已儲存到 Google 試算表！');
+    } else {
+      showToast('❌ 儲存失敗：' + data.message, '#cc0000');
+    }
+  })
+  .catch(function(err) {
+    showToast('❌ 連線失敗，請確認網路', '#cc0000');
+  });
+}
+
+// ===== PDF 存檔 =====
+function saveAsPDF(wrap, qno) {
+  var clone = wrap.cloneNode(true);
+  wrap.querySelectorAll('input[type="text"], input[type="date"]').forEach(function(inp, i) {
+    var cloneInp = clone.querySelectorAll('input[type="text"], input[type="date"]')[i];
+    if (cloneInp) cloneInp.setAttribute('value', inp.value);
+  });
+  clone.querySelector('.form-actions').remove();
+  clone.querySelectorAll('.del-btn, .add-row-btn').forEach(function(b) { b.remove(); });
+
+  var clientInput = wrap.querySelector('input[placeholder="公司名稱或姓名"]');
+  var clientName = clientInput ? clientInput.value || '客戶' : '客戶';
+  var dateStr = new Date().toISOString().split('T')[0].replace(/-/g,'');
+  var suggestName = '報價單_' + clientName + '_' + dateStr;
+
+  var win = window.open('', '_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + suggestName + '</title>' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;}.quote-wrap{border:2px solid #1a2744;}.quote-header{background:#1a2744;color:white;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}.quote-header-left .company{font-size:18px;font-weight:700;}.quote-header-left .license{font-size:11px;color:#C9A84C;}.quote-header-center{font-size:22px;font-weight:700;letter-spacing:4px;}.quote-header-right{text-align:right;}.qno{font-size:13px;color:#C9A84C;font-weight:700;}.qno-label{font-size:10px;color:#aaa;}.section-bar{background:#2E75B6;color:white;font-size:13px;font-weight:700;padding:5px 12px;}table.info-table{width:100%;border-collapse:collapse;table-layout:fixed;}table.info-table td{border:1px solid #ccc;padding:0;}.lbl{background:#F0F4F8;font-weight:700;font-size:12px;color:#1a2744;padding:6px 10px;text-align:center;white-space:nowrap;width:90px;}.val{padding:3px 8px;font-size:13px;}input{width:100%;border:none;font-size:13px;padding:3px 4px;background:transparent;color:#333;}table.items-table{width:100%;border-collapse:collapse;table-layout:fixed;}table.items-table th{background:#1a2744;color:white;font-size:12px;padding:7px 8px;text-align:center;border:1px solid #333;}table.items-table td{border:1px solid #ccc;padding:4px 6px;font-size:13px;}.total-section{display:flex;justify-content:flex-end;border-top:2px solid #1a2744;}.total-table{width:320px;border-collapse:collapse;}.total-table td{border:1px solid #ccc;padding:5px 10px;font-size:13px;}.total-label{background:#F0F4F8;font-weight:700;color:#1a2744;text-align:center;width:120px;}.total-value{text-align:right;}.total-grand{background:#1a2744;color:white;font-weight:700;font-size:14px;text-align:center;}.total-grand-value{background:#C9A84C;color:#1a2744;font-weight:700;font-size:14px;text-align:right;}.daxie{background:#F0F4F8;padding:6px 12px;font-size:12px;color:#1a2744;font-weight:700;border-top:1px solid #ccc;border-bottom:1px solid #ccc;}.bottom-section{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #ccc;}.bottom-left,.bottom-right{padding:10px 12px;font-size:12px;color:#444;line-height:1.8;}.bottom-left{border-right:1px solid #ccc;}.bottom-title{font-weight:700;color:#1a2744;margin-bottom:4px;font-size:13px;}.sign-section{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #ccc;}.sign-box{padding:8px 12px;min-height:90px;}.sign-box:first-child{border-right:1px solid #ccc;}.sign-title{font-size:12px;font-weight:700;color:#1a2744;background:#F0F4F8;text-align:center;padding:4px;margin:-8px -12px 8px;border-bottom:1px solid #ccc;}.sign-line{margin-top:8px;border-bottom:1px solid #bbb;font-size:12px;color:#777;padding-bottom:2px;display:flex;align-items:center;gap:6px;}.sign-line input{flex:1;border:none;font-size:12px;}.quote-footer{text-align:center;font-size:10px;color:#999;padding:6px;border-top:1px solid #eee;}.form-actions,.del-btn,.add-row-btn,.tax-row.hidden{display:none!important;}@page{size:A4 portrait;margin:10mm;}</style>' +
+    '</head><body>' + clone.outerHTML +
+    '<script>window.onload=function(){window.print();setTimeout(function(){window.close();},2000);};<\/script></body></html>');
+  win.document.close();
+  showToast('✅ 建議檔名：' + suggestName + '\n請選「另存為PDF」');
+}
+
+function createQuote(type) {
+  var qno = generateNo(type);
+  var today = getToday();
+  var isPest = type === 'pest';
+  var wrap = document.createElement('div');
+  wrap.className = 'quote-wrap';
+
+  wrap.innerHTML =
+    '<div class="quote-header">' +
+      '<div class="quote-header-left">' +
+        '<div class="company">' + (isPest ? '夏威夷除蟲達人' : '夏威夷實業社') + '</div>' +
+        '<div class="license">' + (isPest ? '執照：環藥病媒字第 13-042 號' : '專業清潔・值得信賴') + '</div>' +
+      '</div>' +
+      '<div class="quote-header-center">' + (isPest ? '病媒防治' : '清潔服務') + ' 報 價 單</div>' +
+      '<div class="quote-header-right"><div class="qno-label">報價單號</div><div class="qno">' + qno + '</div></div>' +
+    '</div>' +
+    '<table class="info-table"><tr>' +
+      '<td class="lbl">報價單號</td><td class="val"><input type="text" value="' + qno + '"></td>' +
+      '<td class="lbl">報價日期</td><td class="val"><input type="text" value="' + today + '"></td>' +
+    '</tr></table>' +
+    '<div class="section-bar">▌ 委託客戶</div>' +
+    '<table class="info-table">' +
+      '<tr><td class="lbl">公司名稱</td><td class="val"><input type="text" placeholder="公司名稱或姓名"></td><td class="lbl">聯　絡　人</td><td class="val"><input type="text" placeholder="姓名"></td></tr>' +
+      '<tr><td class="lbl">聯絡電話</td><td class="val"><input type="text" placeholder="電話號碼"></td><td class="lbl">施作地點</td><td class="val"><input type="text" placeholder="完整施作地址"></td></tr>' +
+    '</table>' +
+    (isPest ?
+      '<div class="section-bar">▌ 防治作業資訊</div>' +
+      '<table class="info-table">' +
+        '<tr><td class="lbl">防治對象</td><td class="val"><input type="text" placeholder="蟑螂、老鼠、白蟻..."></td><td class="lbl">施作範圍</td><td class="val"><input type="text" placeholder="廠區內、戶外空間..."></td></tr>' +
+        '<tr><td class="lbl">施作頻率</td><td class="val"><input type="text" placeholder="每月一次、每季..."></td><td class="lbl">施作次數</td><td class="val"><input type="text" placeholder="次數"></td></tr>' +
+        '<tr><td class="lbl">執照字號</td><td class="val"><input type="text" value="環藥病媒字第 13-042 號" readonly style="color:#1a2744;font-weight:700;"></td><td class="lbl">預計施作日</td><td class="val"><input type="text" placeholder="民國年月日"></td></tr>' +
+      '</table>' : '') +
+    '<div class="section-bar">▌ 施作項目明細</div>' +
+    '<table class="items-table"><thead><tr>' +
+      '<th style="width:40px;">項次</th><th>施作項目名稱</th><th style="width:60px;">數量</th>' +
+      '<th style="width:100px;">單價（元）</th><th style="width:100px;">小計（元）</th><th style="width:140px;">備　　註</th><th style="width:36px;"></th>' +
+    '</tr></thead><tbody id="tbody-' + qno + '"></tbody></table>' +
+    '<button class="add-row-btn" onclick="addRow(this.previousElementSibling.querySelector(\'tbody\'))">＋ 新增項目</button>' +
+    '<div class="total-section"><table class="total-table">' +
+      '<tr><td class="total-label">小　　計</td><td class="total-value"><span class="subtotal-val"></span></td></tr>' +
+      '<tr class="tax-row"><td class="total-label" style="position:relative;">營業稅（5%）<button class="tax-toggle" onclick="toggleTax(this.closest(\'.quote-wrap\'))" title="開關稅金">✕</button></td><td class="total-value"><span class="tax-val"></span></td></tr>' +
+      '<tr><td class="total-grand"><span class="total-label-text">含稅總計</span></td><td class="total-grand-value"><span class="total-val"></span></td></tr>' +
+    '</table></div>' +
+    '<div class="daxie"><span class="daxie-text">總計大寫：新台幣　　　　　　　元整</span></div>' +
+    '<div class="bottom-section">' +
+      '<div class="bottom-left"><div class="bottom-title">▌ 報價說明與付款條件</div>' +
+        '1. 以上內容如有異動，以配合現場實際施作狀況為主。<br>' +
+        '2. 竣工後，一次付款結清。<br>' +
+        '3. 開立與承包廠商相同名稱之統一發票。<br>' +
+        (isPest ? '4. 本公司持有合法執照，所有用藥均符合政府規範。<br>5.' : '4.') + ' 報價如有疑問，請聯繫：董厚謙<br>' +
+        '　 電話：0908-003-398　Email：hawaii365days@gmail.com' +
+      '</div>' +
+      '<div class="bottom-right"><div class="bottom-title">▌ 付款資訊</div>' +
+        '付款方式：□ 匯款　□ 現金<br>' +
+        '銀行名稱：玉山銀行（808）屏東分行<br>' +
+        '戶　　名：夏威夷實業社 董厚謙<br>' +
+        '帳　　號：0934-940-181885' +
+      '</div>' +
+    '</div>' +
+    '<div class="sign-section">' +
+      '<div class="sign-box"><div class="sign-title">▌ 客戶確認</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:6px;">本人（公司）已詳閱並同意本報價單所有內容</div>' +
+        '<div class="sign-line"><span>簽名 / 蓋章：</span><input type="text"></div>' +
+        '<div class="sign-line"><span>日期：</span><input type="text"></div>' +
+      '</div>' +
+      '<div class="sign-box"><div class="sign-title">▌ 廠商用印</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:4px;">' + (isPest ? '夏威夷除蟲達人　夏威夷實業社' : '夏威夷實業社') + '</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:4px;">地址：屏東市瑞華街 129 號</div>' +
+        (isPest ? '<div style="font-size:11px;color:#666;margin-bottom:4px;">執照：環藥病媒字第 13-042 號</div>' : '') +
+        '<div class="sign-line"><span>負責人：</span><input type="text" placeholder="董厚謙"></div>' +
+        '<div class="sign-line"><span>日期：</span><input type="text"></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="quote-footer">夏威夷實業社｜屏東市瑞華街129號｜0908-959-655｜統編：88762480</div>' +
+    '<div class="form-actions">' +
+      '<button class="form-btn form-btn-del" onclick="this.closest(\'.quote-wrap\').remove()">🗑️ 刪除</button>' +
+      '<button class="form-btn form-btn-save" onclick="saveToSheets(this.closest(\'.quote-wrap\'), \'' + qno + '\', \'' + type + '\')">💾 儲存到試算表</button>' +
+      '<button class="form-btn form-btn-pdf" onclick="saveAsPDF(this.closest(\'.quote-wrap\'), \'' + qno + '\')">📄 存檔PDF</button>' +
+    '</div>';
+
+  document.getElementById('quotes-container').appendChild(wrap);
+
+  var tbody = wrap.querySelector('tbody');
+  for (var i = 0; i < 3; i++) addRow(tbody);
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function generateInvoiceNo(type) {
+  var todayKey = getTodayKey();
+  var prefix = type === 'clean' ? '請款-清潔' : '請款-防治';
+  var counterKey = prefix + '-' + todayKey;
+  if (!dailyCounter[counterKey]) { dailyCounter[counterKey] = 0; }
+  dailyCounter[counterKey]++;
+  return prefix + '-' + todayKey + '-' + String(dailyCounter[counterKey]).padStart(2,'0');
+}
+
+function createInvoice(type) {
+  var qno = generateInvoiceNo(type);
+  var today = getToday();
+  var isPest = type === 'pest';
+  var wrap = document.createElement('div');
+  wrap.className = 'quote-wrap';
+
+  wrap.innerHTML =
+    '<div class="quote-header">' +
+      '<div class="quote-header-left">' +
+        '<div class="company">' + (isPest ? '夏威夷除蟲達人' : '夏威夷實業社') + '</div>' +
+        '<div class="license">' + (isPest ? '執照：環藥病媒字第 13-042 號' : '專業清潔・值得信賴') + '</div>' +
+      '</div>' +
+      '<div class="quote-header-center">' + (isPest ? '病媒防治' : '清潔服務') + ' 請 款 單</div>' +
+      '<div class="quote-header-right"><div class="qno-label">請款單號</div><div class="qno">' + qno + '</div></div>' +
+    '</div>' +
+    '<table class="info-table"><tr>' +
+      '<td class="lbl">請款單號</td><td class="val"><input type="text" value="' + qno + '"></td>' +
+      '<td class="lbl">請款日期</td><td class="val"><input type="text" value="' + today + '"></td>' +
+    '</tr><tr>' +
+      '<td class="lbl">對應報價單</td><td class="val"><input type="text" placeholder="對應報價單號（選填）"></td>' +
+      '<td class="lbl">施作日期</td><td class="val"><input type="text" placeholder="實際施作日期"></td>' +
+    '</tr></table>' +
+    '<div class="section-bar">▌ 請款對象</div>' +
+    '<table class="info-table">' +
+      '<tr><td class="lbl">公司名稱</td><td class="val"><input type="text" placeholder="公司名稱或姓名"></td><td class="lbl">聯　絡　人</td><td class="val"><input type="text" placeholder="姓名"></td></tr>' +
+      '<tr><td class="lbl">聯絡電話</td><td class="val"><input type="text" placeholder="電話號碼"></td><td class="lbl">施作地點</td><td class="val"><input type="text" placeholder="完整施作地址"></td></tr>' +
+    '</table>' +
+    '<div class="section-bar">▌ 請款明細</div>' +
+    '<table class="items-table"><thead><tr>' +
+      '<th style="width:40px;">項次</th><th>施作項目名稱</th><th style="width:60px;">數量</th>' +
+      '<th style="width:100px;">單價（元）</th><th style="width:100px;">小計（元）</th><th style="width:140px;">備　　註</th><th style="width:36px;"></th>' +
+    '</tr></thead><tbody id="tbody-inv-' + qno + '"></tbody></table>' +
+    '<button class="add-row-btn" onclick="addRow(this.previousElementSibling.querySelector('tbody'))">＋ 新增項目</button>' +
+    '<div class="total-section"><table class="total-table">' +
+      '<tr><td class="total-label">小　　計</td><td class="total-value"><span class="subtotal-val"></span></td></tr>' +
+      '<tr class="tax-row"><td class="total-label" style="position:relative;">營業稅（5%）<button class="tax-toggle" onclick="toggleTax(this.closest('.quote-wrap'))" title="開關稅金">✕</button></td><td class="total-value"><span class="tax-val"></span></td></tr>' +
+      '<tr><td class="total-grand"><span class="total-label-text">含稅總計</span></td><td class="total-grand-value"><span class="total-val"></span></td></tr>' +
+    '</table></div>' +
+    '<div class="daxie"><span class="daxie-text">總計大寫：新台幣　　　　　　　元整</span></div>' +
+    '<div class="bottom-section">' +
+      '<div class="bottom-left"><div class="bottom-title">▌ 付款說明</div>' +
+        '1. 請於收到請款單後 30 天內完成付款。<br>' +
+        '2. 付款方式：匯款或現金均可。<br>' +
+        '3. 匯款後請通知本公司並提供匯款資訊。<br>' +
+        '4. 如有疑問請聯繫：董厚謙<br>' +
+        '　 電話：0908-003-398　Email：hawaii365days@gmail.com' +
+      '</div>' +
+      '<div class="bottom-right"><div class="bottom-title">▌ 匯款資訊</div>' +
+        '銀行名稱：玉山銀行（808）屏東分行<br>' +
+        '戶　　名：夏威夷實業社 董厚謙<br>' +
+        '帳　　號：0934-940-181885<br>' +
+        '統一編號：88762480' +
+      '</div>' +
+    '</div>' +
+    '<div class="sign-section">' +
+      '<div class="sign-box"><div class="sign-title">▌ 客戶確認收款</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:6px;">本人（公司）確認已收到上述請款單並同意付款</div>' +
+        '<div class="sign-line"><span>簽名 / 蓋章：</span><input type="text"></div>' +
+        '<div class="sign-line"><span>付款日期：</span><input type="text"></div>' +
+      '</div>' +
+      '<div class="sign-box"><div class="sign-title">▌ 廠商用印</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:4px;">' + (isPest ? '夏威夷除蟲達人　夏威夷實業社' : '夏威夷實業社') + '</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:4px;">地址：屏東市瑞華街 129 號</div>' +
+        (isPest ? '<div style="font-size:11px;color:#666;margin-bottom:4px;">執照：環藥病媒字第 13-042 號</div>' : '') +
+        '<div class="sign-line"><span>負責人：</span><input type="text" placeholder="董厚謙"></div>' +
+        '<div class="sign-line"><span>日期：</span><input type="text"></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="quote-footer">夏威夷實業社｜屏東市瑞華街129號｜0908-959-655｜統編：88762480</div>' +
+    '<div class="form-actions">' +
+      '<button class="form-btn form-btn-del" onclick="this.closest('.quote-wrap').remove()">🗑️ 刪除</button>' +
+      '<button class="form-btn form-btn-save" onclick="saveInvoiceToSheets(this.closest('.quote-wrap'), '' + qno + '', '' + type + '')">💾 儲存到試算表</button>' +
+      '<button class="form-btn form-btn-pdf" onclick="saveAsPDF(this.closest('.quote-wrap'), '' + qno + '')">📄 存檔PDF</button>' +
+    '</div>';
+
+  document.getElementById('quotes-container').appendChild(wrap);
+  var tbody = wrap.querySelector('tbody');
+  for (var i = 0; i < 3; i++) addRow(tbody);
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function saveInvoiceToSheets(wrap, qno, type) {
+  var inputs = wrap.querySelectorAll('input[type="text"]');
+  var data = {};
+  inputs.forEach(function(inp) {
+    var ph = inp.getAttribute('placeholder') || '';
+    var val = inp.value.trim();
+    if (ph.indexOf('公司名稱') !== -1) { data.client = val; }
+    if (ph.indexOf('聯絡人') !== -1 || ph.indexOf('姓名') !== -1) { data.contact = data.contact || val; }
+    if (ph.indexOf('電話') !== -1) { data.phone = val; }
+    if (ph.indexOf('地址') !== -1 || ph.indexOf('地點') !== -1) { data.address = val; }
+    if (ph.indexOf('報價單號') !== -1) { data.relatedQuote = val; }
+    if (ph.indexOf('施作日期') !== -1) { data.workDate = val; }
+  });
+
+  var items = [];
+  wrap.querySelectorAll('table.items-table tbody tr').forEach(function(tr) {
+    var cols = tr.querySelectorAll('input');
+    if (cols[0] && cols[0].value) {
+      items.push({
+        name: cols[0].value,
+        qty: cols[1] ? cols[1].value : '',
+        price: cols[2] ? cols[2].value : '',
+        sub: tr.querySelector('.sub-display') ? tr.querySelector('.sub-display').textContent : '',
+        note: cols[3] ? cols[3].value : ''
+      });
+    }
+  });
+
+  var total = wrap.querySelector('.total-val').textContent;
+  var subtotal = wrap.querySelector('.subtotal-val').textContent;
+
+  var payload = {
+    action: 'saveInvoice',
+    qno: qno,
+    type: type === 'clean' ? '清潔業務' : '病媒防治',
+    date: getToday(),
+    relatedQuote: data.relatedQuote || '',
+    workDate: data.workDate || '',
+    client: data.client || '',
+    contact: data.contact || '',
+    phone: data.phone || '',
+    address: data.address || '',
+    items: JSON.stringify(items),
+    subtotal: subtotal,
+    total: total,
+    status: '未收款',
+    timestamp: new Date().toISOString()
+  };
+
+  showToast('⏳ 儲存中...', '#2E75B6');
+
+  fetch('https://script.google.com/macros/s/AKfycbwuJ9v5KvA_NI8iFfkgXmZ8sGooJtSMEF9F2F2QlPdxxgkW8xZxhM-lN3g37Jb4NiJV9g/exec', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success) {
+      showToast('✅ 請款單 ' + qno + ' 已儲存！');
+    } else {
+      showToast('❌ 儲存失敗：' + data.message, '#cc0000');
+    }
+  })
+  .catch(function() {
+    showToast('❌ 連線失敗，請確認網路', '#cc0000');
+  });
+}
+
+</script>
+</body>
+</html>
