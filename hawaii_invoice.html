@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏威夷實業社｜發票紀錄系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-light: #243460;
+  --gold: #C9A84C;
+  --gold-light: #e8c96a;
+  --cream: #f8f4ee;
+  --border: rgba(201,168,76,0.2);
+  --green: #27AE60;
+  --red: #e74c3c;
+  --orange: #E67E22;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--navy);
+  min-height: 100vh;
+  color: var(--cream);
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.header-badge { font-size: 11px; letter-spacing: 3px; color: var(--gold); display: block; margin-bottom: 8px; }
+.header h1 { font-family: 'Noto Serif TC', serif; font-size: 26px; font-weight: 900; color: white; letter-spacing: 2px; }
+
+/* 發票本管理 */
+.book-section {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* 發票本卡片 */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.book-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  position: relative;
+}
+.book-card.warning {
+  border-color: rgba(230,126,34,0.5);
+  background: rgba(230,126,34,0.06);
+}
+.book-card.depleted {
+  border-color: rgba(231,76,60,0.4);
+  background: rgba(231,76,60,0.05);
+  opacity: 0.7;
+}
+.book-type {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.type-2 { background: rgba(39,174,96,0.2); color: #2ecc71; border: 1px solid rgba(39,174,96,0.3); }
+.type-3 { background: rgba(52,152,219,0.2); color: #74b9ff; border: 1px solid rgba(52,152,219,0.3); }
+.book-range { font-size: 14px; font-weight: 500; color: white; margin-bottom: 4px; }
+.book-progress {
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+.book-progress-bar {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.book-progress-bar.warning { background: var(--orange); }
+.book-progress-bar.danger { background: var(--red); }
+.book-info { font-size: 11px; color: rgba(255,255,255,0.4); }
+.book-del {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.2);
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+.book-del:hover { color: var(--red); }
+
+/* 按鈕 */
+.btn {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Noto Sans TC', sans-serif;
+  transition: all 0.2s;
+}
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-light); }
+.btn-green { background: var(--green); color: white; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: rgba(255,255,255,0.6); }
+
+/* 雙月統計 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+}
+.stat-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+.stat-value { font-family: 'Noto Serif TC', serif; font-size: 20px; font-weight: 700; color: var(--gold); }
+.stat-value.green { color: var(--green); }
+.stat-value.red { color: var(--red); }
+
+/* 工具列 */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.form-select {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: white;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  outline: none;
+}
+.form-select option { background: #1a2744; }
+
+/* 發票表格 */
+.table-wrap {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: rgba(201,168,76,0.1); }
+th {
+  padding: 11px 14px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--gold);
+  font-weight: 500;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+tbody tr:hover { background: rgba(255,255,255,0.04); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr.voided { opacity: 0.4; }
+td { padding: 10px 14px; font-size: 13px; vertical-align: middle; }
+td input[type="text"], td input[type="number"], td input[type="date"], td select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13px;
+  width: 100%;
+}
+td input:focus { border-bottom: 1px solid var(--gold); }
+td select option { background: #1a2744; }
+.invoice-no { font-family: monospace; font-size: 13px; color: var(--gold-light); font-weight: 500; }
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.void-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(--red); }
+.btn-del-row {
+  background: rgba(231,76,60,0.15);
+  border: 1px solid rgba(231,76,60,0.3);
+  color: #ff6b6b;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.btn-del-row:hover { background: rgba(231,76,60,0.3); }
+.empty-state { text-align: center; padding: 40px; color: rgba(255,255,255,0.3); font-size: 14px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #1e2d50;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  width: 90%;
+  max-width: 440px;
+}
+.modal h2 { font-family: 'Noto Serif TC', serif; font-size: 18px; color: var(--gold); margin-bottom: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 6px; display: block; }
+.form-input, .form-select-modal {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: white;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  outline: none;
+}
+.form-input:focus, .form-select-modal:focus { border-color: var(--gold); }
+.form-select-modal option { background: #1a2744; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* 新增發票Modal */
+.add-invoice-modal .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--green);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: none;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .book-grid { grid-template-columns: 1fr; }
+  th:nth-child(5), td:nth-child(5) { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <span class="header-badge">Hawaii Industrial</span>
+    <h1>發票紀錄系統</h1>
+  </div>
+
+  <!-- 發票本管理 -->
+  <div class="book-section">
+    <div class="section-title">發票本管理</div>
+    <div class="book-grid" id="bookGrid"></div>
+    <button class="btn btn-gold" onclick="openBookModal()">＋ 新增發票本</button>
+  </div>
+
+  <!-- 雙月統計 -->
+  <div class="book-section">
+    <div class="section-title">雙月統計</div>
+    <div class="toolbar">
+      <label style="font-size:13px;color:rgba(255,255,255,0.5);">統計區間</label>
+      <select class="form-select" id="periodSelect" onchange="updateStats()"></select>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">有效張數</div>
+        <div class="stat-value green" id="statValid">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">報廢張數</div>
+        <div class="stat-value red" id="statVoided">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">開立總金額</div>
+        <div class="stat-value" id="statAmount">$0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 發票紀錄 -->
+  <div class="toolbar">
+    <button class="btn btn-gold" onclick="openAddModal()">＋ 新增發票</button>
+    <button class="btn btn-green" onclick="saveToSheet()">💾 儲存到試算表</button>
+    <select class="form-select" id="filterType" onchange="renderTable()">
+      <option value="all">全部類型</option>
+      <option value="二聯式">二聯式</option>
+      <option value="三聯式">三聯式</option>
+    </select>
+    <select class="form-select" id="filterPeriod" onchange="renderTable()">
+      <option value="all">全部期間</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>發票號碼</th>
+          <th>類型</th>
+          <th>客戶名稱</th>
+          <th>開立日期</th>
+          <th>金額（元）</th>
+          <th>入帳日期</th>
+          <th>報廢</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- 新增發票本 Modal -->
+<div class="modal-overlay" id="bookModal">
+  <div class="modal">
+    <h2>📚 新增發票本</h2>
+    <div class="form-group">
+      <label class="form-label">發票類型</label>
+      <select class="form-select-modal" id="bookType">
+        <option value="二聯式">二聯式</option>
+        <option value="三聯式">三聯式</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">字軌（英文字母，例如 ZX）</label>
+      <input class="form-input" id="bookPrefix" type="text" placeholder="ZX" maxlength="2" style="text-transform:uppercase;">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">起始號碼（8位數字）</label>
+        <input class="form-input" id="bookStart" type="text" placeholder="13154450" maxlength="8">
+      </div>
+      <div class="form-group">
+        <label class="form-label">結束號碼（8位數字）</label>
+        <input class="form-input" id="bookEnd" type="text" placeholder="13154499" maxlength="8">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeBookModal()">取消</button>
+      <button class="btn btn-gold" onclick="addBook()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新增發票 Modal -->
+<div class="modal-overlay add-invoice-modal" id="addModal">
+  <div class="modal">
+    <h2>🧾 新增發票</h2>
+    <div class="form-group">
+      <label class="form-label">發票本（自動帶入下一張號碼）</label>
+      <select class="form-select-modal" id="invoiceBook" onchange="autoFillNo()"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">發票號碼</label>
+        <input class="form-input" id="invoiceNo" type="text" placeholder="ZX-13154450" style="font-family:monospace;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">發票類型</label>
+        <input class="form-input" id="invoiceType" type="text" readonly style="opacity:0.6;">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">客戶名稱</label>
+      <input class="form-input" id="invoiceClient" type="text" placeholder="請輸入客戶名稱">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">開立日期</label>
+        <input class="form-input" id="invoiceDate" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">金額（元）</label>
+        <input class="form-input" id="invoiceAmount" type="number" placeholder="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">入帳日期（選填）</label>
+      <input class="form-input" id="invoicePayDate" type="date">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeAddModal()">取消</button>
+      <button class="btn btn-gold" onclick="addInvoice()">新增</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuJ9v5KvA_NI8iFfkgXmZ8sGooJtSMEF9F2F2QlPdxxgkW8xZxhM-lN3g37Jb4NiJV9g/exec';
+
+// ===== 資料 =====
+let books = [
+  { id: 1, type: '三聯式', prefix: 'ZX', start: 13154450, end: 13154499, current: 13154450 },
+  { id: 2, type: '二聯式', prefix: 'ZZ', start: 10146000, end: 10146049, current: 10146000 },
+];
+let invoices = [];
+let nextBookId = 3;
+let nextInvoiceId = 1;
+
+// ===== 工具函式 =====
+function formatNo(prefix, num) {
+  return prefix + '-' + String(num).padStart(8, '0');
+}
+
+function getToday() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getBimonthlyPeriod(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr);
+  var y = d.getFullYear();
+  var m = d.getMonth() + 1;
+  var period = Math.ceil(m / 2);
+  var months = ['1-2月', '3-4月', '5-6月', '7-8月', '9-10月', '11-12月'];
+  return y + ' ' + months[period - 1];
+}
+
+function getAllPeriods() {
+  var periods = new Set();
+  invoices.forEach(function(inv) {
+    var p = getBimonthlyPeriod(inv.date);
+    if (p) periods.add(p);
+  });
+  // 加入目前期間
+  periods.add(getBimonthlyPeriod(getToday()));
+  return Array.from(periods).sort().reverse();
+}
+
+function showToast(msg, color) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || '#27AE60';
+  t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 3000);
+}
+
+// ===== 發票本 =====
+function renderBooks() {
+  var grid = document.getElementById('bookGrid');
+  if (books.length === 0) {
+    grid.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;">尚無發票本，請新增</div>';
+    return;
+  }
+  grid.innerHTML = books.map(function(b) {
+    var total = b.end - b.start + 1;
+    var used = b.current - b.start;
+    var remain = b.end - b.current + 1;
+    var pct = Math.round((used / total) * 100);
+    var isWarning = remain <= 5 && remain > 0;
+    var isDepleted = remain <= 0;
+    var barClass = isDepleted ? 'danger' : (isWarning ? 'warning' : '');
+    var cardClass = isDepleted ? 'depleted' : (isWarning ? 'warning' : '');
+    return `
+      <div class="book-card ${cardClass}">
+        <button class="book-del" onclick="deleteBook(${b.id})">✕</button>
+        <span class="book-type ${b.type === '二聯式' ? 'type-2' : 'type-3'}">${b.type}</span>
+        <div class="book-range">${b.prefix}-${b.start} ～ ${b.prefix}-${b.end}</div>
+        <div class="book-progress">
+          <div class="book-progress-bar ${barClass}" style="width:${pct}%"></div>
+        </div>
+        <div class="book-info">
+          已用 ${used} 張｜剩餘 <span style="color:${isDepleted ? '#ff6b6b' : (isWarning ? '#f39c12' : '#2ecc71')}">${remain} 張</span>｜共 ${total} 張
+          ${isWarning && !isDepleted ? '　⚠️ 即將用完' : ''}
+          ${isDepleted ? '　🔴 已用完' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openBookModal() {
+  document.getElementById('bookModal').classList.add('open');
+  document.getElementById('bookPrefix').value = '';
+  document.getElementById('bookStart').value = '';
+  document.getElementById('bookEnd').value = '';
+}
+
+function closeBookModal() {
+  document.getElementById('bookModal').classList.remove('open');
+}
+
+function addBook() {
+  var type = document.getElementById('bookType').value;
+  var prefix = document.getElementById('bookPrefix').value.toUpperCase().trim();
+  var start = parseInt(document.getElementById('bookStart').value);
+  var end = parseInt(document.getElementById('bookEnd').value);
+
+  if (!prefix || prefix.length !== 2) { alert('請輸入2位英文字母字軌'); return; }
+  if (!start || !end || start > end) { alert('請正確輸入起始和結束號碼'); return; }
+
+  books.push({ id: nextBookId++, type, prefix, start, end, current: start });
+  closeBookModal();
+  renderBooks();
+  updateBookSelect();
+  showToast('✅ 發票本已新增');
+}
+
+function deleteBook(id) {
+  var book = books.find(function(b) { return b.id === id; });
+  if (!book) return;
+  if (confirm('確定要刪除「' + book.prefix + '-' + book.start + '」這本發票本？')) {
+    books = books.filter(function(b) { return b.id !== id; });
+    renderBooks();
+    updateBookSelect();
+  }
+}
+
+// ===== 新增發票 =====
+function updateBookSelect() {
+  var sel = document.getElementById('invoiceBook');
+  sel.innerHTML = books.filter(function(b) { return b.current <= b.end; }).map(function(b) {
+    var remain = b.end - b.current + 1;
+    return `<option value="${b.id}">${b.type} ${b.prefix}-${b.start}～${b.end}（剩${remain}張）</option>`;
+  }).join('');
+  autoFillNo();
+}
+
+function autoFillNo() {
+  var sel = document.getElementById('invoiceBook');
+  if (!sel.value) return;
+  var bookId = parseInt(sel.value);
+  var book = books.find(function(b) { return b.id === bookId; });
+  if (!book) return;
+  document.getElementById('invoiceNo').value = formatNo(book.prefix, book.current);
+  document.getElementById('invoiceType').value = book.type;
+}
+
+function openAddModal() {
+  if (books.filter(function(b) { return b.current <= b.end; }).length === 0) {
+    alert('沒有可用的發票本，請先新增發票本');
+    return;
+  }
+  updateBookSelect();
+  document.getElementById('invoiceDate').value = getToday();
+  document.getElementById('invoiceClient').value = '';
+  document.getElementById('invoiceAmount').value = '';
+  document.getElementById('invoicePayDate').value = '';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+}
+
+function addInvoice() {
+  var bookId = parseInt(document.getElementById('invoiceBook').value);
+  var no = document.getElementById('invoiceNo').value.trim();
+  var type = document.getElementById('invoiceType').value;
+  var client = document.getElementById('invoiceClient').value.trim();
+  var date = document.getElementById('invoiceDate').value;
+  var amount = parseFloat(document.getElementById('invoiceAmount').value) || 0;
+  var payDate = document.getElementById('invoicePayDate').value;
+
+  if (!no) { alert('請填寫發票號碼'); return; }
+  if (!client) { alert('請填寫客戶名稱'); return; }
+  if (!date) { alert('請填寫開立日期'); return; }
+
+  // 更新發票本目前號碼
+  var book = books.find(function(b) { return b.id === bookId; });
+  if (book) { book.current++; }
+
+  invoices.push({
+    id: nextInvoiceId++,
+    no, type, client, date, amount, payDate,
+    voided: false,
+    period: getBimonthlyPeriod(date)
+  });
+
+  closeAddModal();
+  renderBooks();
+  renderTable();
+  updateStats();
+  updatePeriodSelect();
+  showToast('✅ 發票已新增：' + no);
+}
+
+// ===== 發票表格 =====
+function renderTable() {
+  var typeFilter = document.getElementById('filterType').value;
+  var periodFilter = document.getElementById('filterPeriod').value;
+
+  var filtered = invoices.filter(function(inv) {
+    var typeMatch = typeFilter === 'all' || inv.type === typeFilter;
+    var periodMatch = periodFilter === 'all' || inv.period === periodFilter;
+    return typeMatch && periodMatch;
+  });
+
+  var tbody = document.getElementById('invoiceBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">尚無發票紀錄</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(function(inv) {
+    var typeCls = inv.type === '二聯式' ? 'type-2' : 'type-3';
+    return `
+      <tr class="${inv.voided ? 'voided' : ''}">
+        <td><span class="invoice-no">${inv.no}</span></td>
+        <td><span class="type-badge ${typeCls}">${inv.type}</span></td>
+        <td><input type="text" value="${inv.client}" onchange="updateInvoice(${inv.id},'client',this.value)"></td>
+        <td><input type="date" value="${inv.date}" onchange="updateInvoice(${inv.id},'date',this.value);updateInvoice(${inv.id},'period',getBimonthlyPeriod(this.value));updateStats();updatePeriodSelect()"></td>
+        <td><input type="number" value="${inv.amount}" onchange="updateInvoice(${inv.id},'amount',parseFloat(this.value)||0);updateStats()"></td>
+        <td><input type="date" value="${inv.payDate}" onchange="updateInvoice(${inv.id},'payDate',this.value)"></td>
+        <td style="text-align:center;">
+          <input type="checkbox" class="void-check" ${inv.voided ? 'checked' : ''}
+            onchange="updateInvoice(${inv.id},'voided',this.checked);renderTable();updateStats()">
+        </td>
+        <td><button class="btn-del-row" onclick="deleteInvoice(${inv.id})">🗑️</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function updateInvoice(id, field, value) {
+  var inv = invoices.find(function(i) { return i.id === id; });
+  if (inv) inv[field] = value;
+}
+
+function deleteInvoice(id) {
+  var inv = invoices.find(function(i) { return i.id === id; });
+  if (!inv) return;
+  if (confirm('確定要刪除發票「' + inv.no + '」？')) {
+    invoices = invoices.filter(function(i) { return i.id !== id; });
+    renderTable();
+    updateStats();
+  }
+}
+
+// ===== 統計 =====
+function updatePeriodSelect() {
+  var periods = getAllPeriods();
+  var sel = document.getElementById('periodSelect');
+  var filterSel = document.getElementById('filterPeriod');
+  var currentVal = sel.value;
+
+  sel.innerHTML = periods.map(function(p) {
+    return `<option value="${p}" ${p === currentVal ? 'selected' : ''}>${p}</option>`;
+  }).join('');
+
+  filterSel.innerHTML = '<option value="all">全部期間</option>' +
+    periods.map(function(p) { return `<option value="${p}">${p}</option>`; }).join('');
+
+  updateStats();
+}
+
+function updateStats() {
+  var period = document.getElementById('periodSelect').value;
+  var filtered = invoices.filter(function(inv) { return inv.period === period; });
+  var valid = filtered.filter(function(inv) { return !inv.voided; });
+  var voided = filtered.filter(function(inv) { return inv.voided; });
+  var total = valid.reduce(function(s, inv) { return s + (parseFloat(inv.amount) || 0); }, 0);
+
+  document.getElementById('statValid').textContent = valid.length;
+  document.getElementById('statVoided').textContent = voided.length;
+  document.getElementById('statAmount').textContent = '$' + total.toLocaleString();
+}
+
+// ===== 儲存到試算表 =====
+async function saveToSheet() {
+  showToast('⏳ 儲存中...');
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'saveInvoices',
+        invoices: invoices,
+        timestamp: new Date().toLocaleString('zh-TW')
+      }),
+      mode: 'no-cors'
+    });
+    showToast('✅ 已儲存到試算表！');
+  } catch(e) {
+    showToast('⚠️ 儲存失敗', '#E67E22');
+  }
+}
+
+// ===== Modal 外部點擊關閉 =====
+document.getElementById('bookModal').addEventListener('click', function(e) { if (e.target === this) closeBookModal(); });
+document.getElementById('addModal').addEventListener('click', function(e) { if (e.target === this) closeAddModal(); });
+
+// ===== 初始化 =====
+renderBooks();
+updatePeriodSelect();
+renderTable();
+</script>
+</body>
+</html>
