@@ -251,6 +251,34 @@ body {
 .rest-toggle input { display: none; }
 .rest-label { font-size: 13px; }
 
+/* 固定工作快速選單 */
+.preset-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.preset-btn {
+  padding: 5px 12px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 20px;
+  color: var(--gold);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Noto Sans TC', sans-serif;
+  white-space: nowrap;
+}
+.preset-btn.today-job {
+  background: rgba(201,168,76,0.2);
+  border-color: var(--gold);
+  color: white;
+}
+.preset-btn:hover {
+  background: rgba(201,168,76,0.25);
+  border-color: var(--gold);
+}
+
 /* 收款狀態 */
 .status-row { display: flex; gap: 8px; }
 .status-btn {
@@ -377,7 +405,7 @@ body {
       <div class="form-row col-3">
         <div class="form-group">
           <label class="form-label">日期</label>
-          <input type="date" class="form-input" id="fDate">
+          <input type="date" class="form-input" id="fDate" onchange="renderPresets()">
         </div>
         <div class="form-group">
           <label class="form-label">星期</label>
@@ -415,6 +443,12 @@ body {
 
     <div class="form-card">
       <div class="form-card-title">🏢 案件資訊</div>
+
+      <!-- 固定工作快速選單 -->
+      <div class="form-group">
+        <label class="form-label">固定工作快速帶入</label>
+        <div class="preset-wrap" id="presetWrap"></div>
+      </div>
 
       <div class="form-row col-2">
         <div class="form-group">
@@ -508,6 +542,7 @@ window.onload = function() {
   updateWeekday();
   calcTimeBadge();
   loadLocalRecords();
+  renderPresets();
 };
 
 function updateWeekday() {
@@ -560,6 +595,87 @@ function toggleRest() {
     toggle.classList.remove('active');
     label.textContent = '☐ 標記為休息日';
   }
+}
+
+// ===== 固定工作 =====
+const PRESET_JOBS = [
+  {
+    label: '晨廚 週一三五下午',
+    jobName: '晨間廚房國際總部例行清潔',
+    location: '晨間廚房國際總部',
+    start: '13:00',
+    end: '17:00',
+    staff: '范氏明',
+    type: 'clean',
+    days: [1, 3, 5] // 週一三五
+  },
+  {
+    label: '社皮鈞惠 週二早上',
+    jobName: '社皮鈞惠工業股份有限公司',
+    location: '社皮鈞惠工業股份有限公司',
+    start: '08:00',
+    end: '12:00',
+    staff: '范氏明',
+    type: 'clean',
+    income: 1575,
+    days: [2] // 週二
+  },
+  {
+    label: '屏蒔社區 週三早上',
+    jobName: '屏蒔社區清潔',
+    location: '屏蒔社區',
+    start: '08:00',
+    end: '12:00',
+    staff: '范氏明',
+    type: 'clean',
+    days: [3] // 週三
+  },
+  {
+    label: '印象建設 週五早上',
+    jobName: '印象建設例行清潔',
+    location: '印象建設',
+    start: '08:00',
+    end: '12:00',
+    staff: '范氏明',
+    type: 'clean',
+    days: [5] // 週五
+  },
+];
+
+function renderPresets() {
+  var wrap = document.getElementById('presetWrap');
+  if (!wrap) return;
+  // 取得今天是星期幾
+  var todayDate = document.getElementById('fDate') ? document.getElementById('fDate').value : '';
+  var todayDay = todayDate ? new Date(todayDate).getDay() : new Date().getDay();
+
+  wrap.innerHTML = PRESET_JOBS.map(function(job, idx) {
+    var isToday = job.days.includes(todayDay);
+    return '<button class="preset-btn' + (isToday ? ' today-job' : '') + '" onclick="applyPreset(' + idx + ')" type="button">' +
+      (isToday ? '⭐ ' : '') + job.label +
+    '</button>';
+  }).join('');
+}
+
+function applyPreset(idx) {
+  var job = PRESET_JOBS[idx];
+  document.getElementById('fJobName').value = job.jobName;
+  document.getElementById('fLocation').value = job.location;
+  document.getElementById('fStart').value = job.start;
+  document.getElementById('fEnd').value = job.end;
+  if (job.type) {
+    var typeRadio = document.querySelector('input[name="fType"][value="' + job.type + '"]');
+    if (typeRadio) typeRadio.checked = true;
+  }
+  if (job.income) {
+    var incomeEl = document.getElementById('fIncome');
+    if (incomeEl) incomeEl.value = job.income;
+  }
+  // 帶入人員
+  var staffEl = document.getElementById('fStaff');
+  if (staffEl) staffEl.value = job.staff;
+  // 重新計算時間徽章
+  if (typeof calcTimeBadge === 'function') calcTimeBadge();
 }
 
 // ===== 人員選擇 =====
