@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏威夷實業社｜案場損益分析</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-light: #243460;
+  --gold: #C9A84C;
+  --gold-light: #e8c96a;
+  --cream: #f8f4ee;
+  --border: rgba(201,168,76,0.2);
+  --green: #27AE60;
+  --red: #e74c3c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--navy);
+  min-height: 100vh;
+  color: var(--cream);
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.header-badge { font-size: 11px; letter-spacing: 3px; color: var(--gold); display: block; margin-bottom: 8px; }
+.header h1 { font-family: 'Noto Serif TC', serif; font-size: 26px; font-weight: 900; color: white; letter-spacing: 2px; }
+
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 12px; color: rgba(255,255,255,0.5); }
+.form-input, .form-select {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: white;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--gold); }
+.form-select option { background: #1a2744; }
+
+/* 人力表格 */
+.labor-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.labor-table th {
+  background: rgba(201,168,76,0.1);
+  color: var(--gold);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.labor-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+.labor-table td input, .labor-table td select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13px;
+  width: 100%;
+}
+.labor-table td input:focus { border-bottom: 1px solid var(--gold); }
+.labor-table td select option { background: #1a2744; }
+.labor-amount { color: var(--gold-light); font-weight: 500; text-align: right; }
+
+.btn {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Noto Sans TC', sans-serif;
+  transition: all 0.2s;
+}
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-light); }
+.btn-green { background: var(--green); color: white; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: rgba(255,255,255,0.6); }
+.btn-red { background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.3); color: #ff6b6b; }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+
+/* 支出項目 */
+.expense-row {
+  display: grid;
+  grid-template-columns: 1fr 140px 36px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* 損益結果卡片 */
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.result-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.result-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+.result-value { font-family: 'Noto Serif TC', serif; font-size: 20px; font-weight: 700; color: var(--gold); }
+.result-value.green { color: var(--green); }
+.result-value.red { color: var(--red); }
+
+.toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--green);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: none;
+  z-index: 999;
+}
+
+/* 列印樣式 */
+@media print {
+  body { background: white; color: #333; }
+  body::before { display: none; }
+  .container { padding: 0; max-width: 100%; }
+  .no-print { display: none !important; }
+  .card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 0;
+    break-inside: avoid;
+  }
+  .section-title { color: #1a2744; }
+  .section-title::after { background: #ddd; }
+  .form-input, .form-select { color: #333; background: white; border-color: #ddd; }
+  .labor-table th { background: #f0f0f0; color: #1a2744; }
+  .labor-table td { color: #333; }
+  .labor-table td input, .labor-table td select { color: #333; }
+  .result-card { background: #f8f4ee; border-color: #ddd; }
+  .result-label { color: #666; }
+  .result-value { color: #C9A84C; }
+  .result-value.green { color: #27AE60; }
+  .result-value.red { color: #e74c3c; }
+  .header { border-bottom-color: #ddd; }
+  .header h1 { color: #1a2744; }
+  .header-badge { color: #C9A84C; }
+  @page { size: A4; margin: 15mm; }
+}
+
+@media (max-width: 600px) {
+  .form-row, .form-row-3, .result-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <span class="header-badge">Hawaii Industrial</span>
+    <h1>案場損益分析</h1>
+  </div>
+
+  <div class="toolbar no-print">
+    <button class="btn btn-green" onclick="generateReport()">🧮 計算損益</button>
+    <button class="btn btn-gold" onclick="printReport()">📄 存檔 PDF</button>
+    <button class="btn btn-outline" onclick="clearAll()">🗑️ 清除重填</button>
+  </div>
+
+  <!-- 案場基本資料 -->
+  <div class="card">
+    <div class="section-title">案場基本資料</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">案場名稱</label>
+        <input class="form-input" id="projectName" type="text" placeholder="例：○○建案交屋清潔">
+      </div>
+      <div class="form-group">
+        <label class="form-label">工程總金額（元）</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="form-input" id="totalRevenue" type="number" placeholder="0" oninput="calcResult()" style="flex:1;">
+          <select class="form-select" id="taxType" onchange="calcResult()" style="width:130px;">
+            <option value="inc">含稅（已含5%）</option>
+            <option value="exc">未稅（加5%）</option>
+            <option value="none">免稅</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;" id="taxNote"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">工程開始日期</label>
+        <input class="form-input" id="startDate" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">工程結束日期</label>
+        <input class="form-input" id="endDate" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">備註</label>
+      <input class="form-input" id="projectNote" type="text" placeholder="選填">
+    </div>
+  </div>
+
+  <!-- 人力明細 -->
+  <div class="card">
+    <div class="section-title">人力明細</div>
+    <table class="labor-table">
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th>人員</th>
+          <th>出勤</th>
+          <th>加班時數</th>
+          <th style="text-align:right;">人力成本</th>
+          <th class="no-print"></th>
+        </tr>
+      </thead>
+      <tbody id="laborBody"></tbody>
+    </table>
+    <button class="btn btn-gold btn-sm no-print" onclick="addLaborRow()">＋ 新增人員出勤</button>
+  </div>
+
+  <!-- 其他支出 -->
+  <div class="card">
+    <div class="section-title">其他支出</div>
+    <div id="expenseList"></div>
+    <button class="btn btn-gold btn-sm no-print" onclick="addExpenseRow()">＋ 新增支出項目</button>
+  </div>
+
+  <!-- 損益結果 -->
+  <div class="card">
+    <div class="section-title">損益結果</div>
+    <div class="result-grid">
+      <div class="result-card">
+        <div class="result-label">含稅總金額</div>
+        <div class="result-value" id="resRevenue">$0</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">稅金（5%）</div>
+        <div class="result-value" id="resTax">$0</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">毛利</div>
+        <div class="result-value green" id="resProfit">$0</div>
+      </div>
+    </div>
+    <div class="result-grid">
+      <div class="result-card">
+        <div class="result-label">人力成本</div>
+        <div class="result-value" id="resLabor">$0</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">其他支出</div>
+        <div class="result-value" id="resExpense">$0</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">毛利率</div>
+        <div class="result-value green" id="resMargin">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 列印版支出明細（列印時才顯示） -->
+  <div class="card" id="printSummary" style="display:none;">
+    <div class="section-title">支出明細彙整</div>
+    <table class="labor-table" id="printSummaryTable"></table>
+  </div>
+
+  <div class="card no-print" style="font-size:12px;color:rgba(255,255,255,0.3);text-align:center;padding:12px;">
+    夏威夷實業社｜案場損益分析｜內部參考文件
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 員工日薪資料 =====
+const EMPLOYEES = [
+  { name: '范氏明', daily: 1800, extra: 1000 },
+  { name: '唐晢語', daily: 2000, extra: 0 },
+  { name: '陳韋盛', daily: 1800, extra: 0 },
+  { name: '胡婷芬', daily: 1700, extra: 1500 },
+  { name: '林春岑', daily: 1700, extra: 0 },
+  { name: '黃于哲', daily: 1700, extra: 0 },
+  { name: '黃詩峰', daily: 1700, extra: 0 },
+  { name: '唐懷斌', daily: 1800, extra: 0 },
+];
+
+function calcHalfDay(daily) {
+  return Math.round((daily - 100) / 2 + 100);
+}
+
+let laborRows = [];
+let expenseRows = [];
+let nextLaborId = 1;
+let nextExpenseId = 1;
+
+// ===== 人力明細 =====
+function addLaborRow() {
+  var id = nextLaborId++;
+  laborRows.push({ id, date: '', name: '', attendance: 'full', ot: 0, cost: 0 });
+  renderLaborTable();
+}
+
+function renderLaborTable() {
+  var tbody = document.getElementById('laborBody');
+  if (laborRows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.3);padding:20px;">尚無人力記錄，請新增</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = laborRows.map(function(row) {
+    var emp = EMPLOYEES.find(function(e) { return e.name === row.name; });
+    var cost = calcLaborCost(row);
+    row.cost = cost;
+
+    var empOptions = EMPLOYEES.map(function(e) {
+      return '<option value="' + e.name + '"' + (row.name === e.name ? ' selected' : '') + '>' + e.name + '</option>';
+    }).join('');
+
+    return `
+      <tr>
+        <td><input type="date" value="${row.date}" onchange="updateLabor(${row.id},'date',this.value)"></td>
+        <td>
+          <select onchange="updateLabor(${row.id},'name',this.value);calcResult()">
+            <option value="">選擇人員</option>
+            ${empOptions}
+          </select>
+        </td>
+        <td>
+          <select onchange="updateLabor(${row.id},'attendance',this.value);calcResult()">
+            <option value="full" ${row.attendance==='full'?'selected':''}>全天</option>
+            <option value="half" ${row.attendance==='half'?'selected':''}>半天</option>
+          </select>
+        </td>
+        <td><input type="number" min="0" step="0.5" value="${row.ot}" placeholder="0" style="width:60px;" onchange="updateLabor(${row.id},'ot',parseFloat(this.value)||0);calcResult()"></td>
+        <td class="labor-amount">$${cost.toLocaleString()}</td>
+        <td class="no-print"><button class="btn btn-red btn-sm" onclick="deleteLaborRow(${row.id})">✕</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function calcLaborCost(row) {
+  if (!row.name) return 0;
+  var emp = EMPLOYEES.find(function(e) { return e.name === row.name; });
+  if (!emp) return 0;
+  var base = row.attendance === 'half' ? calcHalfDay(emp.daily) : emp.daily;
+  var ot = Math.round(row.ot) * 200;
+  return base + ot;
+}
+
+function updateLabor(id, field, value) {
+  var row = laborRows.find(function(r) { return r.id === id; });
+  if (row) {
+    row[field] = value;
+    row.cost = calcLaborCost(row);
+    renderLaborTable();
+    calcResult();
+  }
+}
+
+function deleteLaborRow(id) {
+  laborRows = laborRows.filter(function(r) { return r.id !== id; });
+  renderLaborTable();
+  calcResult();
+}
+
+// ===== 其他支出 =====
+function addExpenseRow(name, amount) {
+  var id = nextExpenseId++;
+  expenseRows.push({ id, name: name || '', amount: amount || 0 });
+  renderExpenseList();
+}
+
+function renderExpenseList() {
+  var list = document.getElementById('expenseList');
+  if (expenseRows.length === 0) {
+    list.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:12px;">尚無支出項目</div>';
+    return;
+  }
+  list.innerHTML = expenseRows.map(function(row) {
+    return `
+      <div class="expense-row">
+        <input class="form-input" type="text" value="${row.name}" placeholder="支出項目（例：耗材費用）"
+          onchange="updateExpense(${row.id},'name',this.value)">
+        <input class="form-input" type="number" value="${row.amount || ''}" placeholder="金額"
+          onchange="updateExpense(${row.id},'amount',parseFloat(this.value)||0);calcResult()">
+        <button class="btn btn-red btn-sm no-print" onclick="deleteExpenseRow(${row.id})">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateExpense(id, field, value) {
+  var row = expenseRows.find(function(r) { return r.id === id; });
+  if (row) row[field] = value;
+  calcResult();
+}
+
+function deleteExpenseRow(id) {
+  expenseRows = expenseRows.filter(function(r) { return r.id !== id; });
+  renderExpenseList();
+  calcResult();
+}
+
+// ===== 計算損益 =====
+function calcResult() {
+  var inputAmount = parseFloat(document.getElementById('totalRevenue').value) || 0;
+  var taxType = document.getElementById('taxType').value;
+  var revenue = 0;
+  var taxAmount = 0;
+  var taxNote = document.getElementById('taxNote');
+
+  if (taxType === 'inc') {
+    // 含稅：實收金額即為含稅總額，稅金 = 總額 / 1.05 * 0.05
+    revenue = inputAmount;
+    taxAmount = Math.round(inputAmount / 1.05 * 0.05);
+    taxNote.textContent = '未稅金額：$' + Math.round(inputAmount / 1.05).toLocaleString() + '　稅金（5%）：$' + taxAmount.toLocaleString();
+  } else if (taxType === 'exc') {
+    // 未稅：含稅總額 = 輸入金額 * 1.05
+    taxAmount = Math.round(inputAmount * 0.05);
+    revenue = inputAmount + taxAmount;
+    taxNote.textContent = '含稅總額：$' + revenue.toLocaleString() + '　稅金（5%）：$' + taxAmount.toLocaleString();
+  } else {
+    // 免稅
+    revenue = inputAmount;
+    taxAmount = 0;
+    taxNote.textContent = '免稅案件';
+  }
+  var laborTotal = laborRows.reduce(function(s, r) { return s + (r.cost || 0); }, 0);
+  var expenseTotal = expenseRows.reduce(function(s, r) { return s + (parseFloat(r.amount) || 0); }, 0);
+  var totalCost = laborTotal + expenseTotal;
+  var profit = revenue - totalCost;
+  var margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : 0;
+
+  document.getElementById('resRevenue').textContent = '$' + revenue.toLocaleString();
+  // 更新稅金顯示
+  var taxEl = document.getElementById('resTax');
+  if (taxEl) taxEl.textContent = '$' + taxAmount.toLocaleString();
+  document.getElementById('resCost').textContent = '$' + totalCost.toLocaleString();
+  document.getElementById('resLabor').textContent = '$' + laborTotal.toLocaleString();
+  document.getElementById('resExpense').textContent = '$' + expenseTotal.toLocaleString();
+
+  var profitEl = document.getElementById('resProfit');
+  profitEl.textContent = '$' + profit.toLocaleString();
+  profitEl.className = 'result-value ' + (profit >= 0 ? 'green' : 'red');
+
+  var marginEl = document.getElementById('resMargin');
+  marginEl.textContent = margin + '%';
+  marginEl.className = 'result-value ' + (profit >= 0 ? 'green' : 'red');
+}
+
+function generateReport() {
+  calcResult();
+  showToast('✅ 損益計算完成');
+}
+
+// ===== 列印 =====
+function printReport() {
+  // 產生列印版支出明細
+  var revenue = parseFloat(document.getElementById('totalRevenue').value) || 0;
+  var laborTotal = laborRows.reduce(function(s, r) { return s + (r.cost || 0); }, 0);
+  var expenseTotal = expenseRows.reduce(function(s, r) { return s + (parseFloat(r.amount) || 0); }, 0);
+  var totalCost = laborTotal + expenseTotal;
+  var profit = revenue - totalCost;
+  var margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : 0;
+
+  var rows = '';
+  rows += '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">人力成本合計</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$' + laborTotal.toLocaleString() + '</td></tr>';
+  expenseRows.forEach(function(r) {
+    rows += '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">' + (r.name || '其他') + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$' + (parseFloat(r.amount)||0).toLocaleString() + '</td></tr>';
+  });
+  rows += '<tr style="font-weight:700;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">總支出</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$' + totalCost.toLocaleString() + '</td></tr>';
+  rows += '<tr style="font-weight:700;color:' + (profit>=0?'#27AE60':'#e74c3c') + '"><td style="padding:8px 12px;">毛利（毛利率 ' + margin + '%）</td><td style="padding:8px 12px;text-align:right;">$' + profit.toLocaleString() + '</td></tr>';
+
+  document.getElementById('printSummaryTable').innerHTML = rows;
+  document.getElementById('printSummary').style.display = 'block';
+
+  window.print();
+
+  setTimeout(function() {
+    document.getElementById('printSummary').style.display = 'none';
+  }, 1000);
+}
+
+// ===== 清除 =====
+function clearAll() {
+  if (confirm('確定要清除所有資料重新填寫？')) {
+    document.getElementById('projectName').value = '';
+    document.getElementById('totalRevenue').value = '';
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    document.getElementById('projectNote').value = '';
+    laborRows = [];
+    expenseRows = [];
+    nextLaborId = 1;
+    nextExpenseId = 1;
+    renderLaborTable();
+    renderExpenseList();
+    calcResult();
+  }
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 3000);
+}
+
+// ===== 初始化 =====
+// 預設加入常見支出項目
+addExpenseRow('耗材費用', 0);
+addExpenseRow('油資／交通費', 0);
+addExpenseRow('其他雜支', 0);
+renderLaborTable();
+</script>
+</body>
+</html>
