@@ -450,6 +450,17 @@ body {
         <div class="preset-wrap" id="presetWrap"></div>
       </div>
 
+      <!-- 專案標記 -->
+      <div class="form-group">
+        <label class="form-label">專案標記（選填）</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select class="form-input" id="fProject" style="flex:1;">
+            <option value="">── 無專案 ──</option>
+          </select>
+          <button class="btn-chip" onclick="openProjectModal()" type="button" style="white-space:nowrap;padding:8px 14px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:8px;color:#C9A84C;cursor:pointer;font-size:12px;">＋ 新增專案</button>
+        </div>
+      </div>
+
       <div class="form-row col-2">
         <div class="form-group">
           <label class="form-label">案名</label>
@@ -543,6 +554,7 @@ window.onload = function() {
   calcTimeBadge();
   loadLocalRecords();
   renderPresets();
+  loadProjects();
 };
 
 function updateWeekday() {
@@ -594,6 +606,70 @@ function toggleRest() {
   } else {
     toggle.classList.remove('active');
     label.textContent = '☐ 標記為休息日';
+  }
+}
+
+// ===== 專案管理 =====
+var projects = [];
+
+async function loadProjects() {
+  try {
+    var res = await fetch(APPS_SCRIPT_URL + '?action=getProjects');
+    var data = await res.json();
+    if (data.success) {
+      projects = data.projects || [];
+      renderProjectSelect();
+    }
+  } catch(e) {
+    console.log('專案載入失敗', e);
+  }
+}
+
+function renderProjectSelect() {
+  var sel = document.getElementById('fProject');
+  if (!sel) return;
+  var current = sel.value;
+  sel.innerHTML = '<option value="">── 無專案 ──</option>';
+  projects.filter(function(p) { return p.status !== '已完工'; }).forEach(function(p) {
+    var opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name + (p.startDate ? '（' + p.startDate + '）' : '');
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+}
+
+function openProjectModal() {
+  var name = prompt('請輸入專案名稱：');
+  if (!name || !name.trim()) return;
+  var startDate = prompt('開始日期（例：2026/06/11）：', new Date().toLocaleDateString('zh-TW'));
+  addProject(name.trim(), startDate || '');
+}
+
+async function addProject(name, startDate) {
+  var id = 'proj_' + Date.now();
+  var project = { id: id, name: name, startDate: startDate, status: '進行中' };
+  projects.push(project);
+  renderProjectSelect();
+  document.getElementById('fProject').value = id;
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'saveProject',
+        id: id,
+        name: name,
+        startDate: startDate,
+        status: '進行中',
+        timestamp: new Date().toLocaleString('zh-TW')
+      }),
+      mode: 'no-cors'
+    });
+    showToast('✅ 專案「' + name + '」已建立');
+  } catch(e) {
+    showToast('✅ 專案已建立（本機）');
   }
 }
 
@@ -723,6 +799,8 @@ function buildRecord() {
   var payDate = document.getElementById('fPayDate').value.trim();
   var note = document.getElementById('fNote').value.trim();
 
+  var project = document.getElementById('fProject') ? document.getElementById('fProject').value : '';
+
   return {
     date: date,
     weekday: weekday,
@@ -739,6 +817,7 @@ function buildRecord() {
     payDate: payDate,
     paymentStatus: paymentStatus,
     note: note,
+    project: project,
     timestamp: new Date().toISOString(),
     month: date.substring(0, 7)
   };
@@ -792,6 +871,7 @@ function saveToSheets(rec) {
     payDate: rec.payDate,
     paymentStatus: rec.paymentStatus,
     note: rec.note,
+    project: rec.project || '',
     timestamp: rec.timestamp
   };
 
@@ -849,6 +929,7 @@ function loadRecord(idx) {
   document.getElementById('fStart').value = r.start;
   document.getElementById('fEnd').value = r.end;
   document.getElementById('fJobName').value = r.jobName;
+  if (document.getElementById('fProject') && r.project) document.getElementById('fProject').value = r.project;
   document.getElementById('fLocation').value = r.location;
   document.getElementById('fIncome').value = r.income;
   document.getElementById('fExpense').value = r.expense;
@@ -902,6 +983,7 @@ function clearForm() {
   document.getElementById('fStart').value = '08:00';
   document.getElementById('fEnd').value = '17:00';
   document.getElementById('fJobName').value = '';
+  if (document.getElementById('fProject')) document.getElementById('fProject').value = '';
   document.getElementById('fLocation').value = '';
   document.getElementById('fIncome').value = '0';
   document.getElementById('fExpense').value = '0';
