@@ -233,6 +233,21 @@ body::before {
     <button class="btn btn-outline" onclick="clearAll()">🗑️ 清除重填</button>
   </div>
 
+  <!-- 從專案自動帶入 -->
+  <div class="card no-print">
+    <div class="section-title">從工作日誌自動帶入</div>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <div class="form-group" style="flex:1;min-width:200px;">
+        <label class="form-label">選擇專案</label>
+        <select class="form-select" id="projectSelect">
+          <option value="">── 載入中... ──</option>
+        </select>
+      </div>
+      <button class="btn btn-green" onclick="loadProjectData()" style="margin-bottom:1px;">📥 自動帶入人力資料</button>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:8px;">選擇專案後點「自動帶入」，系統會從工作日誌讀取該專案的所有出勤記錄</div>
+  </div>
+
   <!-- 案場基本資料 -->
   <div class="card">
     <div class="section-title">案場基本資料</div>
@@ -344,6 +359,8 @@ body::before {
 <div class="toast" id="toast"></div>
 
 <script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuJ9v5KvA_NI8iFfkgXmZ8sGooJtSMEF9F2F2QlPdxxgkW8xZxhM-lN3g37Jb4NiJV9g/exec';
+
 // ===== 員工日薪資料 =====
 const EMPLOYEES = [
   { name: '范氏明', daily: 1800, extra: 1000 },
@@ -554,6 +571,86 @@ function printReport() {
   }, 1000);
 }
 
+// ===== 專案自動帶入 =====
+async function loadProjects() {
+  try {
+    var res = await fetch(APPS_SCRIPT_URL + '?action=getProjects');
+    var data = await res.json();
+    var sel = document.getElementById('projectSelect');
+    sel.innerHTML = '<option value="">── 選擇專案 ──</option>';
+    if (data.success && data.projects.length > 0) {
+      data.projects.forEach(function(p) {
+        var opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.name + (p.startDate ? '（' + p.startDate + '）' : '');
+        sel.appendChild(opt);
+      });
+    } else {
+      sel.innerHTML = '<option value="">── 尚無專案 ──</option>';
+    }
+  } catch(e) {
+    document.getElementById('projectSelect').innerHTML = '<option value="">── 載入失敗 ──</option>';
+  }
+}
+
+async function loadProjectData() {
+  var projectId = document.getElementById('projectSelect').value;
+  if (!projectId) { alert('請先選擇專案'); return; }
+
+  var sel = document.getElementById('projectSelect');
+  var projectName = sel.options[sel.selectedIndex].textContent.split('（')[0].trim();
+
+  showToast('⏳ 讀取工作日誌中...');
+
+  try {
+    var res = await fetch(APPS_SCRIPT_URL + '?action=getProjectLogs&projectId=' + encodeURIComponent(projectId));
+    var data = await res.json();
+
+    if (!data.success || data.logs.length === 0) {
+      showToast('⚠️ 此專案尚無工作日誌記錄');
+      return;
+    }
+
+    var logs = data.logs;
+
+    // 自動填入案場名稱
+    document.getElementById('projectName').value = projectName;
+
+    // 自動填入工程期間
+    var dates = logs.map(function(l) { return String(l.date); }).sort();
+    document.getElementById('startDate').value = dates[0] || '';
+    document.getElementById('endDate').value = dates[dates.length - 1] || '';
+
+    // 清除現有人力資料
+    laborRows = [];
+    nextLaborId = 1;
+
+    // 員工日薪對照
+    var empMap = {};
+    EMPLOYEES.forEach(function(e) { empMap[e.name] = e; });
+
+    // 逐筆帶入人力資料
+    logs.forEach(function(log) {
+      if (log.isRest === '是') return;
+      var staffList = String(log.staff || '').split(/[,、，]/).map(function(s) { return s.trim(); }).filter(Boolean);
+      staffList.forEach(function(name) {
+        var id = nextLaborId++;
+        var attendance = String(log.duration || '').indexOf('半') > -1 ? 'half' : 'full';
+        var row = { id: id, date: String(log.date), name: name, attendance: attendance, ot: 0, cost: 0 };
+        row.cost = calcLaborCost(row);
+        laborRows.push(row);
+      });
+    });
+
+    renderLaborTable();
+    calcResult();
+    showToast('✅ 已帶入 ' + logs.length + ' 天、' + laborRows.length + ' 筆人力記錄');
+
+  } catch(e) {
+    showToast('⚠️ 讀取失敗：' + e.message, '#E67E22');
+  }
+}
+
 // ===== 清除 =====
 function clearAll() {
   if (confirm('確定要清除所有資料重新填寫？')) {
@@ -581,6 +678,9 @@ function showToast(msg) {
 }
 
 // ===== 初始化 =====
+// 載入專案清單
+loadProjects();
+
 // 預設加入常見支出項目
 addExpenseRow('耗材費用', 0);
 addExpenseRow('油資／交通費', 0);
