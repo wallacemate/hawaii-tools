@@ -299,14 +299,15 @@ function calcRow(row) {
   var qty = parseFloat(row.querySelector('.qty-input').value) || 0;
   var price = parseFloat(row.querySelector('.price-input').value.replace(/,/g,'')) || 0;
   var sub = qty * price;
-  row.querySelector('.sub-display').textContent = sub > 0 ? sub.toLocaleString() : '';
+  var sd=row.querySelector('.sub-display');
+  if(sd.tagName==='INPUT'){sd.value=sub>0?sub.toLocaleString():'';}else{sd.textContent=sub>0?sub.toLocaleString():'';}
   calcTotal(row.closest('.quote-wrap'));
 }
 
 function calcTotal(wrap) {
   var subtotal = 0;
   wrap.querySelectorAll('.sub-display').forEach(function(el) {
-    subtotal += parseFloat(el.textContent.replace(/,/g,'')) || 0;
+    var v=(el.tagName==='INPUT'?el.value:el.textContent)||''; subtotal+=parseFloat(v.replace(/,/g,''))||0;
   });
   var taxRow = wrap.querySelector('.tax-row');
   var hasTax = !taxRow.classList.contains('hidden');
@@ -357,10 +358,10 @@ function addRow(tbody) {
   var tr = document.createElement('tr');
   tr.innerHTML = '<td style="text-align:center;width:40px;">' + rowNum + '</td>' +
     '<td><input type="text" placeholder="施作項目說明"></td>' +
-    '<td><input type="text" class="qty-input" style="text-align:center;" placeholder="1" oninput="calcRow(this.closest(\'tr\'))"></td>' +
-    '<td><input type="text" class="price-input" style="text-align:right;" placeholder="0" oninput="calcRow(this.closest(\'tr\'))"></td>' +
-    '<td style="text-align:right;background:#fafafa;"><span class="sub-display"></span></td>' +
-    '<td><input type="text" placeholder="備註"></td>' +
+    '<td><input type="text" class="qty-input" style="text-align:center;" placeholder="1" onblur="doCalcRow(this)"></td>' +
+    '<td><input type="text" class="price-input" style="text-align:right;" placeholder="0" onblur="doCalcRow(this)"></td>' +
+    '<td style="text-align:right;background:#fafafa;"><input type="text" class="sub-display" readonly style="text-align:right;background:#fafafa;width:100%;border:none;outline:none;font-size:13px;font-family:inherit;" placeholder="-"></td>' +
+    '<td><textarea placeholder="備註" rows="2" style="width:100%;resize:vertical;min-height:36px;font-size:13px;border:none;outline:none;font-family:inherit;background:transparent;padding:2px 4px;"></textarea></td>' +
     '<td style="text-align:center;width:36px;"><button class="del-btn" onclick="var w=this.closest(\'.quote-wrap\');this.closest(\'tr\').remove();calcTotal(w);w.querySelectorAll(\'table.items-table tbody tr\').forEach(function(r,i){r.cells[0].textContent=i+1;})">✕</button></td>';
   tbody.appendChild(tr);
 }
@@ -389,8 +390,8 @@ function saveToSheets(wrap, qno, type) {
         name: cols[0].value,
         qty: cols[1] ? cols[1].value : '',
         price: cols[2] ? cols[2].value : '',
-        sub: tr.querySelector('.sub-display') ? tr.querySelector('.sub-display').textContent : '',
-        note: cols[3] ? cols[3].value : ''
+        sub: tr.querySelector('.sub-display') ? (tr.querySelector('.sub-display').value||tr.querySelector('.sub-display').textContent) : '',
+        note: tr.querySelector('textarea') ? tr.querySelector('textarea').value : (cols[3] ? cols[3].value : '')
       });
     }
   });
@@ -491,10 +492,13 @@ function createQuote(type) {
     '<div class="section-bar">▌ 施作項目明細</div>' +
     '<table class="items-table"><thead><tr>' +
       '<th style="width:40px;">項次</th><th>施作項目名稱</th><th style="width:60px;">數量</th>' +
-      '<th style="width:100px;">單價（元）</th><th style="width:100px;">小計（元）</th><th style="width:140px;">備　　註</th><th style="width:36px;"></th>' +
+      '<th style="width:100px;">單價（元）</th><th style="width:100px;">小計（元）</th><th style="width:200px;">備　　註</th><th style="width:36px;"></th>' +
     '</tr></thead><tbody id="tbody-' + qno + '"></tbody></table>' +
     '<button class="add-row-btn" onclick="addRow(this.previousElementSibling.querySelector(\'tbody\'))">＋ 新增項目</button>' +
-    '<div class="total-section"><table class="total-table">' +
+    '<button class="add-row-btn" style="background:#E8F5E9;border-color:#27AE60;color:#1a7a3a;margin-top:2px;font-weight:700;" onclick="calcAllRows(this)">🧮 計算小計</button>' +
+    '<div class="total-section">' +
+    '<textarea placeholder="在此輸入備註說明..." style="flex:1;min-height:110px;border:none;border-right:1px solid #ddd;padding:8px 12px;font-size:12px;font-family:inherit;resize:vertical;line-height:1.8;color:#333;outline:none;"></textarea>' +
+    '<table class="total-table">' +
       '<tr><td class="total-label">小　　計</td><td class="total-value"><span class="subtotal-val"></span></td></tr>' +
       '<tr class="tax-row"><td class="total-label" style="position:relative;">營業稅（5%）<button class="tax-toggle" onclick="toggleTax(this.closest(\'.quote-wrap\'))" title="開關稅金">✕</button></td><td class="total-value"><span class="tax-val"></span></td></tr>' +
       '<tr><td class="total-grand"><span class="total-label-text">含稅總計</span></td><td class="total-grand-value"><span class="total-val"></span></td></tr>' +
@@ -591,10 +595,13 @@ function createInvoice(type) {
     '<div class="section-bar">▌ 請款明細</div>' +
     '<table class="items-table"><thead><tr>' +
       '<th style="width:40px;">項次</th><th>施作項目名稱</th><th style="width:60px;">數量</th>' +
-      '<th style="width:100px;">單價（元）</th><th style="width:100px;">小計（元）</th><th style="width:140px;">備　　註</th><th style="width:36px;"></th>' +
+      '<th style="width:100px;">單價（元）</th><th style="width:100px;">小計（元）</th><th style="width:200px;">備　　註</th><th style="width:36px;"></th>' +
     '</tr></thead><tbody id="tbody-inv-' + qno + '"></tbody></table>' +
     '<button class="add-row-btn" onclick="addRow(this.previousElementSibling.querySelector(\'tbody\'))">＋ 新增項目</button>' +
-    '<div class="total-section"><table class="total-table">' +
+    '<button class="add-row-btn" style="background:#E8F5E9;border-color:#27AE60;color:#1a7a3a;margin-top:2px;font-weight:700;" onclick="calcAllRows(this)">🧮 計算小計</button>' +
+    '<div class="total-section">' +
+    '<textarea placeholder="在此輸入備註說明..." style="flex:1;min-height:110px;border:none;border-right:1px solid #ddd;padding:8px 12px;font-size:12px;font-family:inherit;resize:vertical;line-height:1.8;color:#333;outline:none;"></textarea>' +
+    '<table class="total-table">' +
       '<tr><td class="total-label">小　　計</td><td class="total-value"><span class="subtotal-val"></span></td></tr>' +
       '<tr class="tax-row"><td class="total-label" style="position:relative;">營業稅（5%）<button class="tax-toggle" onclick="toggleTax(this.closest(\'.quote-wrap\'))" title="開關稅金">✕</button></td><td class="total-value"><span class="tax-val"></span></td></tr>' +
       '<tr><td class="total-grand"><span class="total-label-text">含稅總計</span></td><td class="total-grand-value"><span class="total-val"></span></td></tr>' +
@@ -664,8 +671,8 @@ function saveInvoiceToSheets(wrap, qno, type) {
         name: cols[0].value,
         qty: cols[1] ? cols[1].value : '',
         price: cols[2] ? cols[2].value : '',
-        sub: tr.querySelector('.sub-display') ? tr.querySelector('.sub-display').textContent : '',
-        note: cols[3] ? cols[3].value : ''
+        sub: tr.querySelector('.sub-display') ? (tr.querySelector('.sub-display').value||tr.querySelector('.sub-display').textContent) : '',
+        note: tr.querySelector('textarea') ? tr.querySelector('textarea').value : (cols[3] ? cols[3].value : '')
       });
     }
   });
@@ -708,6 +715,31 @@ function saveInvoiceToSheets(wrap, qno, type) {
   .catch(function() {
     showToast('❌ 連線失敗，請確認網路', '#cc0000');
   });
+}
+
+
+function doCalcRow(el) {
+  var node = el;
+  while(node && node.tagName !== 'TR') { node = node.parentElement; }
+  if(node) calcRow(node);
+}
+
+function calcAllRows(btn) {
+  var el = btn;
+  while(el && !el.classList.contains('quote-wrap')) { el = el.parentElement; }
+  if(!el) return;
+  el.querySelectorAll('table.items-table tbody tr').forEach(function(row) {
+    var qtyEl = row.querySelector('.qty-input');
+    var priceEl = row.querySelector('.price-input');
+    var subEl = row.querySelector('.sub-display');
+    if(!qtyEl || !priceEl || !subEl) return;
+    var qty = parseFloat(qtyEl.value) || 0;
+    var price = parseFloat(priceEl.value.replace(/,/g,'')) || 0;
+    var sub = qty * price;
+    if(subEl.tagName==='INPUT'){ subEl.value = sub>0 ? sub.toLocaleString() : ''; }
+    else { subEl.textContent = sub>0 ? sub.toLocaleString() : ''; }
+  });
+  calcTotal(el);
 }
 
 </script>
