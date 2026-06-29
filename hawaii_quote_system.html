@@ -225,10 +225,20 @@ table.items-table td {
 }
 
 @media print {
-  body { background: white; padding: 0; }
-  .top-bar, .form-actions, .add-row-btn, .del-btn { display: none; }
-  .quote-wrap { margin: 0; max-width: 100%; border: 2px solid var(--navy); }
-  @page { size: A4 portrait; margin: 10mm; }
+  body { background: white; padding: 0; font-size: 11px; }
+  .top-bar, .form-actions, .add-row-btn, .del-btn, .tax-toggle { display: none !important; }
+  .quote-wrap { margin: 0; max-width: 100%; border: 2px solid var(--navy); page-break-after: always; }
+  .quote-wrap:last-child { page-break-after: auto; }
+  @page { size: A4 portrait; margin: 8mm; }
+  .seal-img { width: 55px !important; height: 55px !important; object-fit: contain !important; }
+  .seal-img:last-child { width: 36px !important; height: 36px !important; }
+  .seal-wrap { display: flex !important; gap: 6px !important; align-items: flex-end !important; margin-top: 4px !important; }
+  .total-section { display: flex !important; }
+  .total-section textarea { max-height: 120px !important; min-height: 60px !important; resize: none !important; overflow: hidden !important; font-size: 11px !important; }
+  .total-table { width: 280px !important; flex-shrink: 0; }
+  .sign-section { display: grid !important; grid-template-columns: 1fr 1fr !important; width: 100% !important; }
+  .sign-box { min-height: 80px !important; padding: 8px 10px !important; }
+  .bottom-section { display: grid !important; grid-template-columns: 1fr 1fr !important; width: 100% !important; }
 }
 
 .seal-wrap { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
