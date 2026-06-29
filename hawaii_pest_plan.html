@@ -174,7 +174,7 @@ function addPlan() {
     + '<table class="plan-table">'
     + '<tr>'
     + '<td class="lbl" style="width:140px;">客戶名稱</td>'
-    + '<td style="width:55%;"><div class="fi-display" id="'+id+'-cname">　</div></td>'
+    + '<td style="width:55%;"><input class="fi" id="'+id+'-cname" placeholder="請輸入或選擇客戶帶入"></td>'
     + '<td class="right-block" rowspan="5" style="width:100px;padding:6px;vertical-align:middle;">'
     + '<div style="font-size:11px;font-weight:bold;margin-bottom:6px;">病媒防治公司</div>'
     + '<div style="width:90px;height:90px;border:1px dashed #aaa;border-radius:4px;margin:0 auto;display:flex;align-items:center;justify-content:center;">'
@@ -182,9 +182,9 @@ function addPlan() {
     + '<div style="font-size:10px;color:#555;margin-top:6px;">病媒防治業<br>專業技術人員</div>'
     + '</td>'
     + '</tr>'
-    + '<tr><td class="lbl">地址</td><td><div class="fi-display" id="'+id+'-caddr">　</div></td></tr>'
+    + '<tr><td class="lbl">地址</td><td><input class="fi" id="'+id+'-caddr" placeholder="客戶地址"></td></tr>'
     + '<tr><td class="lbl">客戶代表簽名</td><td></td></tr>'
-    + '<tr><td class="lbl">客戶名稱及代號（序號）</td><td><div class="fi-display" id="'+id+'-cid">　</div></td></tr>'
+    + '<tr><td class="lbl">客戶名稱及代號（序號）</td><td><input class="fi" id="'+id+'-cid" placeholder="統一編號"></td></tr>'
     + '<tr><td class="lbl">施作序號</td><td><input class="fi" id="'+id+'-seq" placeholder="例：1141101001"></td></tr>'
     + '<tr>'
     + '<td class="lbl">施作地點</td>'
@@ -334,10 +334,10 @@ function importCustomer(id) {
   var c = null;
   for(var i=0; i<customers.length; i++){ if(customers[i].id===cid){ c=customers[i]; break; } }
   if(!c) return;
-  document.getElementById(id+'-cname').textContent = c.name;
-  document.getElementById(id+'-cid').textContent   = c.id;
+  document.getElementById(id+'-cname').value = c.name;
+  document.getElementById(id+'-cid').value   = c.id;
   var addr = c.city+c.dist+c.addr;
-  document.getElementById(id+'-caddr').textContent = addr;
+  document.getElementById(id+'-caddr').value = addr;
   document.getElementById(id+'-loc').value = addr;
 }
 
