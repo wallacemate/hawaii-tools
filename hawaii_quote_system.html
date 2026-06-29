@@ -230,20 +230,20 @@ table.items-table td {
   .quote-wrap { margin: 0; max-width: 100%; border: 2px solid var(--navy); page-break-after: always; }
   .quote-wrap:last-child { page-break-after: auto; }
   @page { size: A4 portrait; margin: 8mm; }
-  .seal-img { width: 55px !important; height: 55px !important; object-fit: contain !important; }
-  .seal-img:last-child { width: 36px !important; height: 36px !important; }
-  .seal-wrap { display: flex !important; gap: 6px !important; align-items: flex-end !important; margin-top: 4px !important; }
+  .seal-wrap { display: flex !important; gap: 6px !important; align-items: flex-end !important; margin-top: 4px !important; max-width: 110px !important; }
+  .seal-img { width: 52px !important; height: 52px !important; max-width: 52px !important; max-height: 52px !important; object-fit: contain !important; }
+  .seal-img:last-child { width: 34px !important; height: 34px !important; max-width: 34px !important; max-height: 34px !important; }
   .total-section { display: flex !important; }
-  .total-section textarea { max-height: 120px !important; min-height: 60px !important; resize: none !important; overflow: hidden !important; font-size: 11px !important; }
-  .total-table { width: 280px !important; flex-shrink: 0; }
+  .total-section textarea { max-height: 110px !important; min-height: 50px !important; resize: none !important; overflow: hidden !important; font-size: 11px !important; }
+  .total-table { width: 270px !important; flex-shrink: 0 !important; }
   .sign-section { display: grid !important; grid-template-columns: 1fr 1fr !important; width: 100% !important; }
-  .sign-box { min-height: 80px !important; padding: 8px 10px !important; }
+  .sign-box { min-height: 70px !important; max-height: 150px !important; padding: 6px 10px !important; overflow: hidden !important; }
   .bottom-section { display: grid !important; grid-template-columns: 1fr 1fr !important; width: 100% !important; }
 }
 
-.seal-wrap { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
-.seal-img { width: 70px; height: 70px; object-fit: contain; opacity: 0.85; }
-.seal-img:last-child { width: 44px; height: 44px; }
+.seal-wrap { display: flex; gap: 6px; align-items: flex-end; margin-top: 4px; }
+.seal-img { width: 55px; height: 55px; max-width: 55px; max-height: 55px; object-fit: contain; opacity: 0.9; }
+.seal-img:last-child { width: 36px; height: 36px; max-width: 36px; max-height: 36px; }
 </style>
 </head>
 <body>
