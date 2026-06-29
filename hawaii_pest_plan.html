@@ -177,7 +177,7 @@ function addPlan() {
     + '<td style="width:55%;"><div class="fi-display" id="'+id+'-cname">　</div></td>'
     + '<td class="right-block" rowspan="5" style="width:100px;padding:6px;vertical-align:middle;">'
     + '<div style="font-size:11px;font-weight:bold;margin-bottom:6px;">病媒防治公司</div>'
-    + '<div style="width:72px;height:72px;border:1px dashed #aaa;border-radius:4px;margin:0 auto;display:flex;align-items:center;justify-content:center;">'
+    + '<div style="width:90px;height:90px;border:1px dashed #aaa;border-radius:4px;margin:0 auto;display:flex;align-items:center;justify-content:center;">'
     + '<span style="font-size:10px;color:#bbb;">用印處</span></div>'
     + '<div style="font-size:10px;color:#555;margin-top:6px;">病媒防治業<br>專業技術人員</div>'
     + '</td>'
@@ -220,12 +220,12 @@ function addPlan() {
 
     // 藥劑明細
     + '<table class="drug-table"><thead><tr>'
-    + '<th style="width:16%;">施用藥劑名稱</th>'
-    + '<th style="width:18%;">使用劑量（或稀釋後濃度）</th>'
-    + '<th style="width:10%;">劑型</th>'
-    + '<th style="width:22%;">許可證字號</th>'
+    + '<th style="width:14%;">施用藥劑名稱</th>'
+    + '<th style="width:15%;">使用劑量（或稀釋後濃度）</th>'
+    + '<th style="width:18%;">劑型</th>'
+    + '<th style="width:20%;">許可證字號</th>'
     + '<th>使用區域</th>'
-    + '<th style="width:44px;">操作</th>'
+    + '<th class="no-print" style="width:44px;">操作</th>'
     + '</tr></thead>'
     + '<tbody id="drug-body-'+id+'">'
     + '<tr>'
@@ -234,7 +234,7 @@ function addPlan() {
     + '<td><input placeholder="劑型"></td>'
     + '<td><input placeholder="許可證字號"></td>'
     + '<td><input placeholder="使用區域"></td>'
-    + '<td style="text-align:center;"><button class="btn-del-drug" onclick="delDrug(this)">✕</button></td>'
+    + '<td class="no-print" style="text-align:center;"><button class="btn-del-drug" onclick="delDrug(this)">✕</button></td>'
     + '</tr>'
     + '</tbody></table>'
     + '<div style="padding:4px 8px;"><button class="btn-add-drug" onclick="addDrug(\'drug-body-'+id+'\',\''+id+'\')">＋ 新增藥劑</button></div>'
@@ -259,12 +259,7 @@ function addPlan() {
     + '<div class="section-lbl">預防中毒及急救方法：</div>'
     + '<div class="fixed-text">'+POISON_NOTES+'</div>'
 
-    // 用印
-    + '<div style="display:flex;justify-content:flex-end;border-top:1px solid #aaa;padding:10px 14px;align-items:center;gap:12px;">'
-    + '<div style="font-size:11px;color:#555;">夏威夷實業社　環藥病媒字第13-042號</div>'
-    + '<div style="width:100px;height:60px;border:1px dashed #aaa;border-radius:4px;display:flex;align-items:center;justify-content:center;">'
-    + '<span style="font-size:10px;color:#bbb;">用印處</span></div>'
-    + '</div>'
+
     + '<div class="footer-bar">夏威夷實業社｜屏東縣屏東市瑞華街129號｜0908-959-655｜環藥病媒字第13-042號</div>';
 
   document.getElementById('plans').appendChild(div);
@@ -368,7 +363,7 @@ function addDrug(tbodyId, planId) {
     +'<td><input placeholder="劑型"></td>'
     +'<td><input placeholder="許可證字號"></td>'
     +'<td><input placeholder="使用區域"></td>'
-    +'<td style="text-align:center;"><button class="btn-del-drug" onclick="delDrug(this)">✕</button></td>';
+    +'<td class="no-print" style="text-align:center;"><button class="btn-del-drug" onclick="delDrug(this)">✕</button></td>';
   tbody.appendChild(tr);
 }
 
