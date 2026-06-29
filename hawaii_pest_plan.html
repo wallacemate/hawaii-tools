@@ -312,7 +312,7 @@ function importCustomer(id) {
   for(var i=0; i<customers.length; i++){ if(customers[i].id===cid){ c=customers[i]; break; } }
   if(!c) return;
   document.getElementById(id+'-cname').textContent = c.name;
-  document.getElementById(id+'-cid').textContent   = 'CU'+c.id;
+  document.getElementById(id+'-cid').textContent   = c.id;
   var addr = c.city+c.dist+c.addr;
   document.getElementById(id+'-caddr').textContent = addr;
   document.getElementById(id+'-loc').value = addr;
