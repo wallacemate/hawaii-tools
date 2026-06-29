@@ -162,6 +162,13 @@ function addPlan() {
     `<option value="${m}">${m}</option>`
   ).join('');
 
+  const methodChecks = METHODS.map(m =>
+    `<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+      <input type="checkbox" value="${m}" onchange="updateMethodChecks('${id}')" style="width:15px;height:15px;cursor:pointer;accent-color:#1a2744;">
+      ${m}
+    </label>`
+  ).join('');
+
   // 客戶下拉選單
   const custOptions = customers.map(c =>
     `<option value="${c.id}">${c.id} ${c.name}</option>`
@@ -233,7 +240,8 @@ function addPlan() {
         <td><input class="fi" id="${id}-loc" placeholder="施作地點（預設同客戶地址）"></td>
         <td style="border:1px solid #aaa;">
           <span style="font-weight:bold;">施作日期：</span>
-          <input class="fi" style="width:180px;" placeholder="民國　　年　　月　　日">
+          <input type="date" class="fi" style="width:150px;" onblur="convertROC(this,'${id}-roc-date')">
+          <span id="${id}-roc-date" style="font-size:12px;color:#333;margin-left:4px;"></span>
         </td>
       </tr>
       <tr>
@@ -314,18 +322,17 @@ function addPlan() {
     <div class="section-lbl">施作方法：</div>
     <table class="plan-table" style="border-top:none;">
       <tr>
-        <td class="lbl" style="width:100px;border-top:none;">施作方式</td>
+        <td class="lbl" style="width:100px;border-top:none;vertical-align:top;padding-top:8px;">施作方式<br><span style="font-size:10px;color:#888;">（可複選）</span></td>
         <td style="border-top:none;">
-          <select class="method-select" onchange="updateMethod(this,'${id}')">
-            <option value="">-- 請選擇施作方式 --</option>
-            ${methodOptions}
-          </select>
+          <div style="display:flex;flex-direction:column;gap:5px;padding:4px 0;" id="method-checks-${id}">
+            ${methodChecks}
+          </div>
         </td>
-        <td class="lbl" style="width:80px;border-top:none;">施作人員</td>
-        <td style="border-top:none;"><input class="fi" placeholder="施作人員姓名"></td>
+        <td class="lbl" style="width:80px;border-top:none;vertical-align:top;padding-top:8px;">施作人員</td>
+        <td style="border-top:none;vertical-align:top;padding-top:8px;"><input class="fi" placeholder="施作人員姓名"></td>
       </tr>
     </table>
-    <div class="method-desc-area" id="method-desc-${id}" style="color:#aaa;font-style:italic;">請先選擇施作方式...</div>
+    <div class="method-desc-area" id="method-desc-${id}" style="min-height:60px;"></div>
 
     <!-- 注意事項 -->
     <div class="section-lbl">施作時及施作後應注意事項：</div>
@@ -422,20 +429,43 @@ function delDrug(btn) {
   else { alert('至少需要保留一列藥劑'); }
 }
 
-// ── 施作方式帶出說明 ─────────────────────
-function updateMethod(sel, id) {
-  const val  = sel.value;
-  const desc = document.getElementById('method-desc-' + id);
-  if(val && METHOD_DESC[val]) {
-    desc.textContent   = METHOD_DESC[val];
-    desc.style.color   = '#333';
-    desc.style.fontStyle = 'normal';
-  } else {
-    desc.textContent   = '請先選擇施作方式...';
-    desc.style.color   = '#aaa';
-    desc.style.fontStyle = 'italic';
-  }
+// ── 民國日期轉換 ─────────────────────────
+function convertROC(input, displayId) {
+  const val = input.value;
+  if(!val) { document.getElementById(displayId).textContent = ''; return; }
+  const d = new Date(val);
+  const roc = d.getFullYear() - 1911;
+  const m   = d.getMonth() + 1;
+  const day = d.getDate();
+  document.getElementById(displayId).textContent =
+    '民國 ' + roc + ' 年 ' + m + ' 月 ' + day + ' 日';
 }
+
+// ── 施作方式複選更新說明 ──────────────────
+function updateMethodChecks(planId) {
+  const container = document.getElementById('method-checks-' + planId);
+  const checks    = container.querySelectorAll('input[type=checkbox]');
+  const desc      = document.getElementById('method-desc-' + planId);
+  const selected  = [];
+  checks.forEach(cb => { if(cb.checked) selected.push(cb.value); });
+
+  if(selected.length === 0) {
+    desc.textContent  = '';
+    desc.style.color  = '#aaa';
+    return;
+  }
+  desc.style.color    = '#333';
+  desc.style.fontStyle = 'normal';
+  desc.textContent    = selected.map((m,i) => {
+    const d = METHOD_DESC[m] || '';
+    // 重新編號
+    return d.replace(/^1\./, (i+1) + '.');
+  }).join('
+
+');
+}
+
+// ── 施作方式帶出說明（由 updateMethodChecks 處理）──
 
 // 預設開啟一份
 addPlan();
