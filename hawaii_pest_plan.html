@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏威夷病媒防治施作計畫書</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Microsoft JhengHei',sans-serif;background:#f0f0f0;padding:20px;font-size:13px;}
+.container{max-width:860px;margin:0 auto;}
+
+.top-bar{background:white;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.btn{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:bold;}
+.btn-new{background:#1a2744;color:white;}
+.btn-print{background:#C9A84C;color:#1a2744;}
+.btn:hover{opacity:.85;}
+.loading-bar{font-size:12px;color:#888;padding:4px 8px;}
+
+.plan-wrap{background:white;border:1px solid #aaa;margin-bottom:28px;position:relative;}
+
+.plan-header{padding:14px 20px;display:flex;align-items:center;gap:16px;border-bottom:1px solid #aaa;}
+.plan-logo{width:68px;height:68px;object-fit:contain;}
+.plan-title-text{font-size:22px;font-weight:bold;letter-spacing:5px;flex:1;text-align:center;color:#1a2744;}
+
+.co-info-table{width:100%;border-collapse:collapse;border-bottom:1px solid #aaa;}
+.co-info-table td{padding:3px 12px;font-size:12px;}
+
+.plan-table{width:100%;border-collapse:collapse;}
+.plan-table td{border:1px solid #aaa;padding:4px 8px;vertical-align:middle;font-size:13px;}
+.lbl{background:#f5f5f5;font-weight:bold;color:#000;white-space:nowrap;}
+.right-block{background:#f9f9f9;text-align:center;font-size:11px;vertical-align:middle;color:#333;line-height:2.2;}
+
+.checkbox-group{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.cb-item{display:flex;align-items:center;gap:3px;font-size:13px;cursor:pointer;}
+.cb-item input{width:14px;height:14px;cursor:pointer;}
+
+.freq-group{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px;}
+.freq-item{display:flex;align-items:center;gap:3px;}
+.freq-input{width:36px;border:none;border-bottom:1px solid #aaa;text-align:center;font-size:13px;font-family:inherit;outline:none;}
+
+/* 客戶搜尋區 */
+.customer-search{background:#EAF2FB;padding:8px 12px;border-bottom:1px solid #ccc;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.customer-search label{font-size:12px;font-weight:bold;color:#1a2744;white-space:nowrap;}
+.search-input{padding:5px 10px;border:1px solid #ccc;border-radius:4px;font-size:12px;font-family:inherit;width:160px;}
+.customer-select{padding:5px 8px;border:1px solid #ccc;border-radius:4px;font-size:12px;font-family:inherit;min-width:200px;}
+.btn-import{padding:5px 14px;background:#1a2744;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold;}
+.btn-import:hover{background:#2E75B6;}
+
+/* 藥劑表格 */
+.drug-table{width:100%;border-collapse:collapse;font-size:12px;}
+.drug-table th{background:#f0f0f0;font-weight:bold;padding:4px 8px;text-align:center;border:1px solid #aaa;font-size:12px;}
+.drug-table td{border:1px solid #aaa;padding:3px 6px;vertical-align:middle;}
+.drug-table input{width:100%;border:none;outline:none;font-size:12px;font-family:inherit;background:transparent;text-align:center;}
+.drug-table select{width:100%;border:none;outline:none;font-size:12px;font-family:inherit;background:transparent;cursor:pointer;}
+.btn-add-drug{margin:5px 8px;padding:3px 10px;background:#2E75B6;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;}
+.btn-del-drug{background:#e74c3c;color:white;border:none;border-radius:3px;cursor:pointer;padding:1px 6px;font-size:11px;}
+
+.method-select{border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;cursor:pointer;width:100%;}
+.method-desc-area{padding:8px 12px;font-size:12px;line-height:1.9;min-height:70px;color:#333;white-space:pre-wrap;border-top:none;}
+.fixed-text{padding:8px 16px;font-size:12px;line-height:1.9;color:#333;white-space:pre-wrap;}
+.section-lbl{font-weight:bold;color:#000;padding:4px 8px;font-size:13px;border-bottom:1px solid #aaa;border-top:1px solid #aaa;background:#f5f5f5;}
+
+.fi{border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;width:100%;padding:2px 0;}
+.fi:focus{border-bottom:1px solid #2E75B6;}
+.fi-display{font-size:13px;color:#333;padding:2px 4px;background:#fafafa;}
+
+.sign-section{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #aaa;}
+.sign-box{padding:10px 14px;min-height:80px;}
+.sign-box:first-child{border-right:1px solid #aaa;}
+.sign-title{font-size:12px;font-weight:bold;background:#f5f5f5;padding:3px 8px;margin:-10px -14px 8px;border-bottom:1px solid #aaa;}
+.sign-line{margin-top:10px;border-bottom:1px solid #bbb;font-size:12px;color:#777;padding-bottom:2px;}
+.seal{display:flex;gap:8px;margin-top:4px;}
+
+.btn-del-plan{position:absolute;top:6px;right:6px;background:#e74c3c;color:white;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:12px;z-index:10;}
+.footer-bar{text-align:center;font-size:10px;color:#999;padding:4px;border-top:1px solid #eee;}
+
+@media print{
+  .top-bar,.btn-del-plan,.btn-add-drug,.btn-del-drug,.customer-search{display:none!important;}
+  body{background:white;padding:0;}
+  .plan-wrap{page-break-after:always;border:1px solid #aaa;margin-bottom:0;}
+  .plan-wrap:last-child{page-break-after:auto;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <div style="font-size:15px;font-weight:bold;color:#1a2744;">🦟 夏威夷病媒防治施作計畫書</div>
+    <button class="btn btn-new" onclick="addPlan()">＋ 新增計畫書</button>
+    <button class="btn btn-print" onclick="window.print()">🖨️ 列印全部</button>
+    <span class="loading-bar" id="loadingBar">⏳ 載入客戶與藥劑資料...</span>
+  </div>
+  <div id="plans"></div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbyMLq5eIIz-heaT7pLEWXt4ENsbriBslKLyyH4h1VeVDPGXcO1ZjFACY_FM9WSLMNCN/exec";
+
+const METHODS = [
+  "一般殘效噴灑",
+  "加壓灌注處理",
+  "空間噴灑 - FOGGING（熱霧機 Fogging Machine）",
+  "空間噴灑 - SOLO（背負式彌霧機 SOLO Mist Blower）",
+  "空間噴灑 - ULV（超低容量噴霧 Ultra Low Volume）",
+  "藥劑投放作業",
+  "施點餌劑作業"
+];
+
+const METHOD_DESC = {
+  "一般殘效噴灑": "1.一般性殘效噴灑：使用動力式噴霧機將藥劑成帶狀噴灑於牆角、辦公桌下、機台下、細縫或害蟲可能藏匿處，施工後藥效維持長期效果，害蟲接觸有致死效果，此針對爬行性害蟲如蟑螂、蜘蛛等。",
+  "加壓灌注處理": "1.加壓灌注處理：使用加壓設備將藥劑注入牆縫、木材孔隙或土壤中，達到深層防治效果，適用於白蟻及隱藏性害蟲之防治，藥效持久且針對性強。",
+  "空間噴灑 - FOGGING（熱霧機 Fogging Machine）": "1.空間噴灑（熱霧機 Fogging Machine）：使用加熱使藥箱中之煤油產生煙霧，由注射熱空氣（高過於200℃）之高速氣流，使之汽化，噴出後凝縮而成煙霧狀（霧粒直徑在15μm以下），漂浮於空氣中，施工後可迅速將飛翔性害蟲殺死。此針對飛翔性害蟲，如蚊、蠅等。",
+  "空間噴灑 - SOLO（背負式彌霧機 SOLO Mist Blower）": "1.空間噴灑（背負式彌霧機 SOLO Mist Blower）：使用背負式彌霧機將藥劑霧化後均勻噴灑於空間中，霧粒細小可均勻分散至各角落，適用於蚊蠅等飛翔性害蟲之防治，施工效率高且覆蓋面積廣。",
+  "空間噴灑 - ULV（超低容量噴霧 Ultra Low Volume）": "1.空間噴灑（超低容量 ULV，Ultra Low Volume）：使用超低容量噴霧機，將極少量藥劑霧化成極細微粒（霧粒直徑5~50μm），懸浮於空氣中擴散至各處，可有效殺滅飛翔性害蟲，用藥量少、效果佳。",
+  "藥劑投放作業": "1.藥劑投放作業：將藥劑投放於害蟲活動區域或巢穴附近，利用害蟲覓食習性使其攝入藥劑，達到防治效果。適用於老鼠、蟑螂等害蟲，投放位置以害蟲出沒路徑為主。",
+  "施點餌劑作業": "1.施點餌劑作業：將餌劑點狀施放於害蟲活動路徑、隱匿處及棲息場所，利用害蟲覓食行為使其取食餌劑後達到防治效果，此方式安全性高，適用於餐飲場所及有人員活動之環境。"
+};
+
+const BEFORE_NOTES =
+`施作時應注意事項：
+1. 人、寵物撤離
+2. 食品、食具妥善包裝或隔離
+3. 水族箱覆蓋並停止打氣
+4. 關閉門窗、冷氣及通風口
+
+施作後應注意事項：
+1. 施藥完畢（依標示時間4小時）後，打開門窗通風，始可入內清掃
+2. 對人、寵物易於接觸之處，請加強擦拭`;
+
+const POISON_NOTES =
+`1. 預防中毒：工作人員須著裝安全防護，施作前如有飼養寵物請先行帶離，並將所有食物及器材收拾妥善，避免直接接觸藥劑。
+2. 中毒症狀：如四肢無力、頭暈、冒冷汗、噁心、嘔吐及呼吸困難等症狀。
+3. 急救方式：如有以上中毒症狀發生，請立即將患者搬離現場移至通風處；若症狀無明顯改善，請攜帶施作藥劑之產品標示送醫治療。`;
+
+let customers = [];
+let drugs = [];
+let planCount = 0;
+
+// ── 載入資料 ──────────────────────────────
+Promise.all([
+  fetch(API_URL + "?action=getCustomers").then(r => r.json()),
+  fetch(API_URL + "?action=getDrugs").then(r => r.json())
+]).then(([cRes, dRes]) => {
+  if(cRes.ok) customers = cRes.customers;
+  if(dRes.ok) drugs = dRes.drugs;
+  document.getElementById('loadingBar').textContent = 
+    "✅ 已載入 " + customers.length + " 個客戶、" + drugs.length + " 種藥劑";
+  setTimeout(() => { document.getElementById('loadingBar').style.display = 'none'; }, 3000);
+}).catch(() => {
+  document.getElementById('loadingBar').textContent = "⚠ 資料載入失敗，請重新整理";
+});
+
+// ── 新增計畫書 ────────────────────────────
+function addPlan() {
+  planCount++;
+  const id = 'plan-' + planCount;
+  const div = document.createElement('div');
+  div.className = 'plan-wrap';
+  div.id = id;
+
+  const methodOptions = METHODS.map(m =>
+    `<option value="${m}">${m}</option>`
+  ).join('');
+
+  // 客戶下拉選單
+  const custOptions = customers.map(c =>
+    `<option value="${c.id}">${c.id} ${c.name}</option>`
+  ).join('');
+
+  div.innerHTML = `
+    <button class="btn-del-plan" onclick="this.parentElement.remove()">✕ 刪除</button>
+
+    <!-- 標題 -->
+    <div class="plan-header">
+      <img class="plan-logo" src="https://wallacemate.github.io/hawaii-tools/logo.jfif" onerror="this.style.display='none'">
+      <div class="plan-title-text">夏 威 夷 病 媒 防 治 施 作 計 畫 書</div>
+    </div>
+
+    <!-- 公司資訊 -->
+    <table class="co-info-table">
+      <tr>
+        <td>病媒防治業名稱：<strong>夏威夷實業社</strong></td>
+        <td style="text-align:right;">許可執照字號：環藥病媒字第13-042號</td>
+      </tr>
+      <tr>
+        <td>地　址：屏東縣屏東市瑞華街129號</td>
+        <td style="text-align:right;">電話：0908-959-655</td>
+      </tr>
+    </table>
+
+    <!-- 客戶搜尋帶入 -->
+    <div class="customer-search">
+      <label>🔍 選擇客戶：</label>
+      <input type="text" class="search-input" placeholder="輸入關鍵字篩選" oninput="filterCustomers(this,'cust-sel-${id}')">
+      <select class="customer-select" id="cust-sel-${id}">
+        <option value="">-- 請選擇客戶 --</option>
+        ${custOptions}
+      </select>
+      <button class="btn-import" onclick="importCustomer('${id}')">帶入</button>
+    </div>
+
+    <!-- 客戶資料 -->
+    <table class="plan-table">
+      <tr>
+        <td class="lbl" style="width:140px;">客戶名稱</td>
+        <td style="width:55%;"><div class="fi-display" id="${id}-cname">　</div></td>
+        <td class="right-block" rowspan="5" style="width:100px;padding:6px;vertical-align:middle;">
+          <div style="font-size:11px;font-weight:bold;margin-bottom:6px;">病媒防治公司</div>
+          <div style="width:72px;height:72px;border:1px dashed #aaa;border-radius:4px;margin:0 auto;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:10px;color:#bbb;">用印處</span>
+          </div>
+          <div style="font-size:10px;color:#555;margin-top:6px;">病媒防治業<br>專業技術人員</div>
+        </td>
+      </tr>
+      <tr>
+        <td class="lbl">地址</td>
+        <td><div class="fi-display" id="${id}-caddr">　</div></td>
+      </tr>
+      <tr>
+        <td class="lbl">客戶代表簽名</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="lbl">客戶名稱及代號（序號）</td>
+        <td><div class="fi-display" id="${id}-cid">　</div></td>
+      </tr>
+      <tr>
+        <td class="lbl">施作序號</td>
+        <td><input class="fi" id="${id}-seq" placeholder="例：1141101001"></td>
+      </tr>
+      <tr>
+        <td class="lbl">施作地點</td>
+        <td><input class="fi" id="${id}-loc" placeholder="施作地點（預設同客戶地址）"></td>
+        <td style="border:1px solid #aaa;">
+          <span style="font-weight:bold;">施作日期：</span>
+          <input class="fi" style="width:180px;" placeholder="民國　　年　　月　　日">
+        </td>
+      </tr>
+      <tr>
+        <td class="lbl">施作範圍描述</td>
+        <td><input class="fi" placeholder="施作範圍描述"></td>
+        <td style="border:1px solid #aaa;">
+          <span style="font-weight:bold;">施作面積：</span>
+          <input class="fi" style="width:80px;" placeholder="約">
+          <select style="border:none;font-size:13px;font-family:inherit;outline:none;">
+            <option>坪</option><option>㎡</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td class="lbl">防治對象</td>
+        <td colspan="2">
+          <div class="checkbox-group">
+            <label class="cb-item"><input type="checkbox">蟑螂</label>
+            <label class="cb-item"><input type="checkbox">老鼠</label>
+            <label class="cb-item"><input type="checkbox">跳蚤</label>
+            <label class="cb-item"><input type="checkbox">蚊子</label>
+            <label class="cb-item"><input type="checkbox">蒼蠅</label>
+            <label class="cb-item"><input type="checkbox">白蟻</label>
+            <label class="cb-item"><input type="checkbox">環境消毒</label>
+            <label class="cb-item"><input type="checkbox">其他：<input class="fi" style="width:80px;"></label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="lbl">施作次數</td>
+        <td colspan="2">
+          <div class="freq-group">
+            <label class="freq-item"><input type="radio" name="freq-${id}"> 一次施作</label>
+            <label class="freq-item">
+              <input type="radio" name="freq-${id}"> 定期保養：每月
+              <input class="freq-input" placeholder="1">次　每季
+              <input class="freq-input" placeholder="">次　每半年
+              <input class="freq-input" placeholder="">次
+            </label>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- 藥劑明細 -->
+    <table class="drug-table">
+      <thead>
+        <tr>
+          <th style="width:16%;">施用藥劑名稱</th>
+          <th style="width:18%;">使用劑量（或稀釋後濃度）</th>
+          <th style="width:10%;">劑型</th>
+          <th style="width:22%;">許可證字號</th>
+          <th>使用區域</th>
+          <th style="width:44px;">操作</th>
+        </tr>
+      </thead>
+      <tbody id="drug-body-${id}">
+        <tr>
+          <td>
+            <select onchange="importDrug(this,'${id}')" style="width:100%;border:none;outline:none;font-size:12px;font-family:inherit;background:transparent;cursor:pointer;">
+              <option value="">-- 選擇藥劑 --</option>
+              ${drugs.map(d => `<option value="${d.name}">${d.name}</option>`).join('')}
+            </select>
+          </td>
+          <td><input placeholder="使用劑量"></td>
+          <td><input placeholder="劑型"></td>
+          <td><input placeholder="許可證字號"></td>
+          <td><input placeholder="使用區域"></td>
+          <td style="text-align:center;"><button class="btn-del-drug" onclick="delDrug(this)">✕</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="padding:4px 8px;">
+      <button class="btn-add-drug" onclick="addDrug('drug-body-${id}','${id}')">＋ 新增藥劑</button>
+    </div>
+
+    <!-- 施作方法 -->
+    <div class="section-lbl">施作方法：</div>
+    <table class="plan-table" style="border-top:none;">
+      <tr>
+        <td class="lbl" style="width:100px;border-top:none;">施作方式</td>
+        <td style="border-top:none;">
+          <select class="method-select" onchange="updateMethod(this,'${id}')">
+            <option value="">-- 請選擇施作方式 --</option>
+            ${methodOptions}
+          </select>
+        </td>
+        <td class="lbl" style="width:80px;border-top:none;">施作人員</td>
+        <td style="border-top:none;"><input class="fi" placeholder="施作人員姓名"></td>
+      </tr>
+    </table>
+    <div class="method-desc-area" id="method-desc-${id}" style="color:#aaa;font-style:italic;">請先選擇施作方式...</div>
+
+    <!-- 注意事項 -->
+    <div class="section-lbl">施作時及施作後應注意事項：</div>
+    <div class="fixed-text">${BEFORE_NOTES}</div>
+
+    <!-- 預防中毒 -->
+    <div class="section-lbl">預防中毒及急救方法：</div>
+    <div class="fixed-text">${POISON_NOTES}</div>
+
+    <!-- 用印空白欄 -->
+    <div style="display:flex;justify-content:flex-end;border-top:1px solid #aaa;padding:10px 14px;align-items:center;gap:12px;">
+      <div style="font-size:11px;color:#555;">夏威夷實業社　環藥病媒字第13-042號</div>
+      <div style="width:100px;height:60px;border:1px dashed #aaa;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:10px;color:#bbb;">用印處</span>
+      </div>
+    </div>
+    <div class="footer-bar">夏威夷實業社｜屏東縣屏東市瑞華街129號｜0908-959-655｜環藥病媒字第13-042號</div>
+  `;
+
+  document.getElementById('plans').appendChild(div);
+}
+
+// ── 客戶關鍵字篩選 ───────────────────────
+function filterCustomers(inp, selId) {
+  const kw  = inp.value.trim().toLowerCase();
+  const sel = document.getElementById(selId);
+  sel.innerHTML = '<option value="">-- 請選擇客戶 --</option>';
+  const list = kw
+    ? customers.filter(c => c.name.toLowerCase().includes(kw) || c.id.includes(kw))
+    : customers;
+  list.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.id + ' ' + c.name;
+    sel.appendChild(opt);
+  });
+}
+
+// ── 帶入客戶資料 ─────────────────────────
+function importCustomer(id) {
+  const sel = document.getElementById('cust-sel-' + id);
+  const cid = sel.value;
+  if(!cid) { alert('請先選擇客戶'); return; }
+  const c = customers.find(x => x.id === cid);
+  if(!c) return;
+
+  document.getElementById(id + '-cname').textContent = c.name;
+  document.getElementById(id + '-cid').textContent   = 'CU' + c.id;
+  const fullAddr = c.city + c.dist + c.addr;
+  document.getElementById(id + '-caddr').textContent = fullAddr;
+  document.getElementById(id + '-loc').value         = fullAddr;
+}
+
+// ── 帶入藥劑資料 ─────────────────────────
+function importDrug(sel, planId) {
+  const name = sel.value;
+  if(!name) return;
+  const d = drugs.find(x => x.name === name);
+  if(!d) return;
+  const row = sel.closest('tr');
+  const inputs = row.querySelectorAll('input');
+  inputs[0].value = d.dose;   // 使用劑量
+  inputs[1].value = d.form;   // 劑型
+  inputs[2].value = d.license; // 許可證字號
+}
+
+// ── 新增藥劑列 ───────────────────────────
+function addDrug(tbodyId, planId) {
+  const tbody = document.getElementById(tbodyId);
+  const drugOptions = drugs.map(d =>
+    `<option value="${d.name}">${d.name}</option>`
+  ).join('');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>
+      <select onchange="importDrug(this,'${planId}')" style="width:100%;border:none;outline:none;font-size:12px;font-family:inherit;background:transparent;cursor:pointer;">
+        <option value="">-- 選擇藥劑 --</option>
+        ${drugOptions}
+      </select>
+    </td>
+    <td><input placeholder="使用劑量"></td>
+    <td><input placeholder="劑型"></td>
+    <td><input placeholder="許可證字號"></td>
+    <td><input placeholder="使用區域"></td>
+    <td style="text-align:center;"><button class="btn-del-drug" onclick="delDrug(this)">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+// ── 刪除藥劑列 ───────────────────────────
+function delDrug(btn) {
+  const tbody = btn.closest('tr').parentElement;
+  if(tbody.rows.length > 1) { btn.closest('tr').remove(); }
+  else { alert('至少需要保留一列藥劑'); }
+}
+
+// ── 施作方式帶出說明 ─────────────────────
+function updateMethod(sel, id) {
+  const val  = sel.value;
+  const desc = document.getElementById('method-desc-' + id);
+  if(val && METHOD_DESC[val]) {
+    desc.textContent   = METHOD_DESC[val];
+    desc.style.color   = '#333';
+    desc.style.fontStyle = 'normal';
+  } else {
+    desc.textContent   = '請先選擇施作方式...';
+    desc.style.color   = '#aaa';
+    desc.style.fontStyle = 'italic';
+  }
+}
+
+// 預設開啟一份
+addPlan();
+</script>
+</body>
+</html>
