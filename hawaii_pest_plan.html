@@ -44,6 +44,8 @@ body{font-family:'Microsoft JhengHei',sans-serif;background:#f0f0f0;padding:20px
 .btn-add-drug{margin:5px 8px;padding:3px 10px;background:#2E75B6;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;}
 .btn-del-drug{background:#e74c3c;color:white;border:none;border-radius:3px;cursor:pointer;padding:1px 6px;font-size:11px;}
 .method-desc-area{padding:8px 12px;font-size:12px;line-height:1.9;min-height:60px;color:#333;white-space:pre-wrap;}
+.method-print-only{display:none;padding:4px 8px;font-size:12px;color:#333;}
+@media print{ .no-print{display:none!important;} }
 .fixed-text{padding:8px 16px;font-size:12px;line-height:1.9;color:#333;white-space:pre-wrap;}
 .section-lbl{font-weight:bold;color:#000;padding:4px 8px;font-size:13px;border-bottom:1px solid #aaa;border-top:1px solid #aaa;background:#f5f5f5;}
 .fi{border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;width:100%;padding:2px 0;}
@@ -52,7 +54,8 @@ body{font-family:'Microsoft JhengHei',sans-serif;background:#f0f0f0;padding:20px
 .btn-del-plan{position:absolute;top:6px;right:6px;background:#e74c3c;color:white;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:12px;z-index:10;}
 .footer-bar{text-align:center;font-size:10px;color:#999;padding:4px;border-top:1px solid #eee;}
 @media print{
-  .top-bar,.btn-del-plan,.btn-add-drug,.btn-del-drug,.customer-search{display:none!important;}
+  .top-bar,.btn-del-plan,.btn-add-drug,.btn-del-drug,.customer-search,.method-checks-wrap{display:none!important;}
+  .method-print-only{display:block!important;}
   body{background:white;padding:0;}
   .plan-wrap{page-break-after:always;border:1px solid #aaa;margin-bottom:0;}
   .plan-wrap:last-child{page-break-after:auto;}
@@ -188,7 +191,8 @@ function addPlan() {
     + '<td><input class="fi" id="'+id+'-loc" placeholder="施作地點"></td>'
     + '<td style="border:1px solid #aaa;">'
     + '<span style="font-weight:bold;">施作日期：</span>'
-    + '<input class="fi" style="width:200px;" placeholder="民國　　年　　月　　日">'
+    + '<input type="date" id="'+id+'-date" style="border:none;outline:none;font-size:13px;font-family:inherit;width:130px;" onchange="convertROC(this,\''+id+'-roc\')" class="no-print">'
+    + '<span id="'+id+'-roc" style="font-size:13px;color:#333;margin-left:4px;"></span>'
     + '</td>'
     + '</tr>'
     + '<tr>'
@@ -240,7 +244,10 @@ function addPlan() {
     + '<table class="plan-table" style="border-top:none;">'
     + '<tr>'
     + '<td class="lbl" style="width:100px;border-top:none;vertical-align:top;padding-top:8px;">施作方式<br><span style="font-size:10px;color:#888;">（可複選）</span></td>'
-    + '<td style="border-top:none;"><div style="display:flex;flex-direction:column;gap:5px;padding:4px 0;" id="method-checks-'+id+'">' + methodChecks + '</div></td>'
+    + '<td style="border-top:none;">'
+    + '<div class="method-checks-wrap" style="display:flex;flex-direction:column;gap:5px;padding:4px 0;" id="method-checks-'+id+'">' + methodChecks + '</div>'
+    + '<div class="method-print-only" id="method-print-'+id+'"></div>'
+    + '</td>'
     + '</tr></table>'
     + '<div class="method-desc-area" id="method-desc-'+id+'"></div>'
 
@@ -280,10 +287,10 @@ function openDrugSelect(sel) {
 
 function convertROC(input, displayId) {
   if(!input.value){ document.getElementById(displayId).textContent=''; return; }
-  var d = new Date(input.value);
-  var roc = d.getFullYear()-1911;
-  var m = d.getMonth()+1;
-  var day = d.getDate();
+  var parts = input.value.split('-');
+  var roc = parseInt(parts[0])-1911;
+  var m = parseInt(parts[1]);
+  var day = parseInt(parts[2]);
   document.getElementById(displayId).textContent = '民國'+roc+'年'+m+'月'+day+'日';
 }
 
@@ -291,16 +298,23 @@ function updateMethodChecks(planId) {
   var container = document.getElementById('method-checks-'+planId);
   var checks = container.querySelectorAll('input[type=checkbox]');
   var desc = document.getElementById('method-desc-'+planId);
+  var printDiv = document.getElementById('method-print-'+planId);
   var selected = [];
   for(var i=0; i<checks.length; i++){
     if(checks[i].checked) selected.push(checks[i].value);
   }
-  if(selected.length===0){ desc.textContent=''; return; }
+  if(selected.length===0){
+    desc.textContent='';
+    if(printDiv) printDiv.textContent='';
+    return;
+  }
   var lines = [];
   for(var i=0; i<selected.length; i++){
     lines.push((i+1)+'. '+selected[i]+'：'+(METHOD_DESC[selected[i]]||''));
   }
-  desc.textContent = lines.join('\n\n');
+  var text = lines.join('\n\n');
+  desc.textContent = text;
+  if(printDiv) printDiv.textContent = selected.join('、');
 }
 
 function filterCustomers(inp, selId) {
