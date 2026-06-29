@@ -111,8 +111,10 @@ Promise.all([
   if(dRes.ok) drugs = dRes.drugs;
   document.getElementById('loadingBar').textContent = "✅ 已載入 " + customers.length + " 個客戶、" + drugs.length + " 種藥劑";
   setTimeout(function(){ document.getElementById('loadingBar').style.display='none'; }, 3000);
+  addPlan();
 }).catch(function(){
   document.getElementById('loadingBar').textContent = "⚠ 資料載入失敗，請確認網路連線";
+  addPlan();
 });
 
 function addPlan() {
@@ -186,8 +188,7 @@ function addPlan() {
     + '<td><input class="fi" id="'+id+'-loc" placeholder="施作地點"></td>'
     + '<td style="border:1px solid #aaa;">'
     + '<span style="font-weight:bold;">施作日期：</span>'
-    + '<input type="date" style="border:none;outline:none;font-size:13px;font-family:inherit;width:140px;" onblur="convertROC(this,\''+id+'-roc\')">'
-    + '<span id="'+id+'-roc" style="font-size:12px;color:#333;margin-left:4px;"></span>'
+    + '<input class="fi" style="width:200px;" placeholder="民國　　年　　月　　日">'
     + '</td>'
     + '</tr>'
     + '<tr>'
@@ -240,8 +241,7 @@ function addPlan() {
     + '<tr>'
     + '<td class="lbl" style="width:100px;border-top:none;vertical-align:top;padding-top:8px;">施作方式<br><span style="font-size:10px;color:#888;">（可複選）</span></td>'
     + '<td style="border-top:none;"><div style="display:flex;flex-direction:column;gap:5px;padding:4px 0;" id="method-checks-'+id+'">' + methodChecks + '</div></td>'
-    + '<td class="lbl" style="width:80px;border-top:none;vertical-align:top;padding-top:8px;">施作人員</td>'
-    + '<td style="border-top:none;vertical-align:top;padding-top:8px;"><input class="fi" placeholder="施作人員姓名"></td>'
+''
     + '</tr></table>'
     + '<div class="method-desc-area" id="method-desc-'+id+'"></div>'
 
@@ -262,6 +262,21 @@ function addPlan() {
     + '<div class="footer-bar">夏威夷實業社｜屏東縣屏東市瑞華街129號｜0908-959-655｜環藥病媒字第13-042號</div>';
 
   document.getElementById('plans').appendChild(div);
+}
+
+
+function getDrugOptions() {
+  var opts = '<option value="">-- 選擇藥劑 --</option>';
+  for(var i=0; i<drugs.length; i++){
+    opts += '<option value="'+drugs[i].name+'">'+drugs[i].name+'</option>';
+  }
+  return opts;
+}
+
+function openDrugSelect(sel) {
+  if(sel.options.length <= 1) {
+    sel.innerHTML = getDrugOptions();
+  }
 }
 
 function convertROC(input, displayId) {
@@ -333,13 +348,9 @@ function importDrug(sel, planId) {
 
 function addDrug(tbodyId, planId) {
   var tbody = document.getElementById(tbodyId);
-  var drugOptions = '<option value="">-- 選擇藥劑 --</option>';
-  for(var i=0; i<drugs.length; i++){
-    drugOptions += '<option value="'+drugs[i].name+'">'+drugs[i].name+'</option>';
-  }
   var tr = document.createElement('tr');
   tr.innerHTML =
-    '<td><select onchange="importDrug(this,\''+planId+'\')" style="width:100%;border:none;outline:none;font-size:12px;font-family:inherit;background:transparent;cursor:pointer;">'+drugOptions+'</select></td>'
+    '<td><select onchange="importDrug(this,\''+planId+'\')" style="width:100%;border:none;outline:none;font-size:12px;font-family:inherit;background:transparent;cursor:pointer;">'+getDrugOptions()+'</select></td>'
     +'<td><input placeholder="使用劑量"></td>'
     +'<td><input placeholder="劑型"></td>'
     +'<td><input placeholder="許可證字號"></td>'
@@ -354,7 +365,6 @@ function delDrug(btn) {
   else{ alert('至少需要保留一列藥劑'); }
 }
 
-addPlan();
 </script>
 </body>
 </html>
