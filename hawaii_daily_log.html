@@ -536,7 +536,7 @@ body {
 
 <script>
 // ===== 設定 =====
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuJ9v5KvA_NI8iFfkgXmZ8sGooJtSMEF9F2F2QlPdxxgkW8xZxhM-lN3g37Jb4NiJV9g/exec';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-FRoxfrYcYVonh9Bix-XNiaTbSnzJpHdR9ErAd7vx1gJh_couguVeeV0k0unLUWBs/exec';
 var BOT_TOKEN = ''; // 選填，如果要發送 Telegram
 var CHAT_ID = '8978889851';
 
@@ -875,14 +875,21 @@ function saveToSheets(rec) {
     timestamp: rec.timestamp
   };
 
-  fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  })
+  // 用 GET 送出資料，避開跨來源問題
+  var params = new URLSearchParams();
+  params.append('action', 'save');
+  params.append('month', payload.month || '');
+  Object.keys(payload).forEach(function(k) {
+    params.append(k, payload[k] !== undefined ? String(payload[k]) : '');
+  });
+
+  fetch(APPS_SCRIPT_URL + '?' + params.toString())
   .then(function(res) { return res.json(); })
   .then(function(data) {
-    if (!data.success) {
-      showToast('⚠️ 雲端儲存失敗，已存本機', '#E67E22');
+    if (data.ok) {
+      showToast('✅ 已同步至雲端', '#27AE60');
+    } else {
+      showToast('⚠️ 雲端儲存失敗', '#E67E22');
     }
   })
   .catch(function() {
